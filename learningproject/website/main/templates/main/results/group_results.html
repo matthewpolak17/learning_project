@@ -1,0 +1,23 @@
+{% extends 'main/base.html'%}
+{% block title %}Subject Setup{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div style="width:60%; margin:auto">
+    <br>
+    <h4 style="text-align:center" class="display-6">Subject Results</h4>
+    <br>
+    {% for subject in subjects %}
+    <div class="card">
+        <div class="card-body">
+            <h4>{{subject.title}}</h4><br>
+            {% for score in scores %}
+                {% if score.subject == subject %}
+                    <p style="font-size:larger"><span style="font-weight:bold">{{score.user}}</span> - {{score.value}}%</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div><br>
+    {% endfor %}
+</div>
+{% endblock %}
