@@ -1,0 +1,47 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Reply{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<br>
+
+    <div><br>
+        <div>
+            <h4 class="card-subtitle mb-2 text-body-secondary" style="margin-left:13px">{{post.author}}</h4>
+        </div>
+        <div class="card" style="margin-top:15px">
+            <div class="card-body">
+              <h5 class="card-title" style="font-weight:bold">{{post.title}}</h5>
+              <p class="fs-5">{{post.description}}</p>
+              <p class="card-text" style="font-weight:lighter; color:dimgray">{{post.created_at}}</p>
+            </div>
+        </div>
+
+
+    </div><br>
+    <form method="POST">
+        {% csrf_token %}
+        {{form.media}}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-outline-primary">Reply</button>
+    </form><br>
+    <div class="card">
+        <div class="card-header">
+            <h5>Comments</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for reply in post.replies.all reversed %}
+                <li class="list-group-item">
+                    <div style="font:large; font-weight:bold; margin-top:10px">{{reply.author}}</div> <div style="margin-top:5px">{{reply.description}}</div>
+                    <span style="float:right; font-weight:lighter; color:dimgray; font-size:smaller; margin-top:14px">{{reply.created_at}}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <br>
+    <a href="{% url 'home' %}" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" style="margin-left:13px">Back</a>
+    <br><br><br>
+    
+    
+{% endblock %}

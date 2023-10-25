@@ -1,0 +1,23 @@
+{% extends 'main/base.html'%}
+
+{% block title %}Content{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:60%; margin:auto">
+    <br>
+    <h4>Subjects Left to Study</h4>
+    <hr>
+    
+    {% for subject in subjects %}
+        {% if subject not in dont_include %}
+        <a href="{% url 'take_subject_detail' subject.pk %}">{{subject.title}}</a><br><br>
+        {% endif %}
+    {% endfor %}
+
+    {% if noavail %}
+    <h6>There are no subjects to review right now</h6>
+    {% endif %}
+</div>
+
+{% endblock %}

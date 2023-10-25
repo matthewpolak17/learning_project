@@ -1,0 +1,63 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Home{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:60%; margin:auto">
+    <br>
+    <h4>Welcome {{user.get_short_name}} | {% if user.is_teacher %} Teacher View {% else %} Student View {% endif %}</h4>
+    <hr>
+    <h5>Feed</h5><br>
+
+    {% for post in posts reversed %}
+    <div class="card">
+        <div class="card-body">
+            {% if post.author == user %}
+            <form method="POST">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-outline-danger btn-sm" style="float:right" value={{post.id}} name="post-id">Delete</button>
+
+            </form>
+            {% endif %}
+            <h6 class="card-subtitle mb-2 text-body-secondary">{{post.author}}</h6>
+            <h6 class="card-title" style="margin-top:15px">{{post.title}}</h6>
+            <p class="card-text" style="display:inline">{{post.description}}</p>
+            <br><br>
+
+            {% if post.files.count > 0 %}
+            <a href="{% url 'file_view' post.pk %}" style="text-decoration:none">{{post.files.count}} file(s) attached</a>
+            {% else %}
+
+            {% endif %}
+            <br>
+
+            <div style="display:flex">
+
+                <p class="card-subtitle mb-2 text-body-secondary" style="font:small; margin-top:1px">{{post.created_at}}</p>
+                <div class="text-body-secondary" style="margin-inline:15px">
+                    {% if post.replies.count == 0 %}
+                        <p style="color:rgb(71, 71, 71); text-decoration:none">No replies</p>
+                    {% elif post.replies.count == 1%}
+                        <a href="{% url 'reply' post.pk %}" style="color:rgb(71, 71, 71)">{{post.replies.count }} reply</a>
+                    {% else %}
+                        <a href="{% url 'reply' post.pk %}" style="color:rgb(71, 71, 71)">{{post.replies.count }} replies</a>
+                    {% endif %}
+                </div>
+
+                {% if post.author != request.user %}
+                        <a href="{% url 'reply' post.pk %}" style="text-decoration:none">Reply</a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div><br>
+    {% empty %}
+    <p>It looks like no one's posted yet...</p>
+    {% endfor %}
+    <p style="margin-left:13px">{{posts.count}} posts | <i class="fa fa-eye"></i> {{page_visits}}</p><br><br>
+</div>
+{% endblock %}
+
+

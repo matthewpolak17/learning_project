@@ -1,0 +1,26 @@
+{% extends 'main/base.html'%}
+{% block title %}Create Post{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div style="width:50%; margin:auto">
+  <br>
+  <h4>Create Post</h2>
+  <hr><br>
+  <form method="POST" enctype="multipart/form-data" name="createpost">
+    {% csrf_token %}
+    <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control" id="post-title" placeholder="Enter Title" required=""><br>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" name="description" class="form-control" id="post-description" placeholder="Description here" required=""><br>
+      </div>
+      <div class="form-group">
+        <input type="file" name="files" class="form-control-file" id="post-image" multiple=""><br><br>
+      </div>
+    <button type="sumbit" class="btn btn-outline-primary">Post</button>
+    
+  </form>
+</div>
+{% endblock %}

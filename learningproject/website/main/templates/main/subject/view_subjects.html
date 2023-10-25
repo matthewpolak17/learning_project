@@ -1,0 +1,16 @@
+{% extends 'main/base.html' %}
+
+{% block title %}View Subject{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:50%; margin:auto">
+    <br>
+    <h4>Subjects Posted</h4>
+    <hr><br>
+    {% for subject in subjects %}
+        <a href="{% url 'question_setup' subject.pk %}">{{ subject.title }}</a><br><br>
+    {% endfor %}
+</div>
+    
+{% endblock %}
