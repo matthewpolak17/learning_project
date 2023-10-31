@@ -75,18 +75,18 @@ class Answer(models.Model):
     text = models.CharField(max_length=255, null=True, blank=True)
     is_correct = models.BooleanField(null=True, blank=True)
 
-#score model
-class Score(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
-    value = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
-
     def __str__(self):
-        return str(self.user) + "'s score on " + str(self.subject.title)
+        return str("Question: " + self.question.text + " Answer:" + self.text)
 
 #attempt model
 class Attempt(models.Model):
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
-    score = models.ForeignKey(Score, null=True, on_delete=models.CASCADE)
-    answers = models.ManyToManyField(Answer)
+    number = models.IntegerField(default=0)
+    score = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
+
+
+#AttemptedAnswer model
+class AttemptedAnswer(models.Model):
+    answer = models.ForeignKey(Answer, null=True, on_delete=models.CASCADE)
+    attempt = models.ForeignKey(Attempt, null=True, related_name="attempted_answers", on_delete=models.CASCADE)
