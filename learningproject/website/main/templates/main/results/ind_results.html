@@ -1,22 +1,43 @@
 {% extends 'main/base.html'%}
 {% block title %}{{user.get_short_name}}'s Results{% endblock %}
 {% load crispy_forms_tags %}
+{% load filters %}
 {% block content %}
 
 <div style="width:60%; margin:auto">
     <br>
-    <h4>{{user.get_short_name}}'s Results</h4>
+    <h4>Results</h4>
     <hr>
-    {% for score in scores reversed %}
-    
-        {% if score.user == request.user %}
-            <p>{{score.subject.title}}: {{score.value}}%</p>
-        {% endif %}
-    {% endfor %}
+    <p>**Selected answers are highlighted in <span style="color:blue">blue</span></p>
+    <br>
 
-    {% if counter == 0%}
-    <h6>It looks like you haven't reviewed any subjects yet...</h6>
+    {% if none_taken%}
+    <h5>It looks like you haven't studied any subjects yet...</h5>
     {% endif %}
+
+    {% for subject in subjects_taken %}
+        <h3 style="text-align:center; color:rgb(0, 58, 105)">{{subject.title}}</h3>
+        {% for a in user_attempts %}
+        {% if a.subject == subject%}
+        <div class="card" style="padding:20px; margin-top:15px">
+            <h5 style="text-align:center">Attempt {{a.number}}</h5><hr>
+            {% for question in subject.questions.all %}
+                <p style="font-weight:bold">{{question.text}}</p>
+                {% for answer in question.answers.all %}
+                    {% if answer in aa and aa|get_item:answer == a %}
+                        <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                    {% else %}
+                        <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                    {% endif %}
+                {% endfor %}
+                <hr>
+            {% endfor %}
+            <h5 style="text-align:center">Score: {{a.score}}%</h5>
+        </div><br><br>
+        {% endif %}
+        {% endfor %}
+        
+    {% endfor %}
 </div>
 
 {% endblock %}

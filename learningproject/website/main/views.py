@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from .forms import AnswerForm, QuestionForm, SubjectSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
-from .models import Post, File, Question, Subject, Score, Attempt
+from .models import AttemptedAnswer, Post, File, Question, Subject, Attempt
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -194,7 +194,6 @@ def view_subjects(request):
 @login_required(login_url="/login")
 def content(request):
     subjects = Subject.objects.all()
-    scores = Score.objects.all()
     subjects_with_attempts = []
 
     for subject in subjects:
@@ -206,7 +205,7 @@ def content(request):
         })
     
     
-    return render(request, 'main/subject/content.html', {"subjects":subjects, "scores":scores, "subjects_with_attempts":subjects_with_attempts})
+    return render(request, 'main/subject/content.html', {"subjects":subjects, "subjects_with_attempts":subjects_with_attempts})
 
 
 #This view pulls up a subject and calculates the student's score
@@ -216,11 +215,11 @@ def take_subject_detail(request, pk):
 
     subject = Subject.objects.get(id=pk)
 
-    if (Attempt.objects.filter(student=request.user, subject=subject).count() >= subject.max_attempts):
-        return redirect('/content/')
+    #number of current attempts taken for a subject
+    current_attempts = Attempt.objects.filter(student=request.user, subject=subject).count()
 
-    new_attempt = Attempt(student=request.user, subject=subject)
-    new_attempt.save()
+    if (current_attempts >= subject.max_attempts):
+        return redirect('/content/')
 
     correct = 0
     incorrect = 0
@@ -228,21 +227,27 @@ def take_subject_detail(request, pk):
     #take subject form
     if request.method == 'POST':
         print(request.POST)
+        new_attempt = Attempt(student=request.user, subject=subject, number=current_attempts+1)
+        new_attempt.save()
+
         questions = subject.questions.all()
         for question in questions:
             answers = question.answers.all()
             for answer in answers:
-                new_attempt.answers.add(answer)
+                
+                if (str(answer.pk) in request.POST):
+                    AttemptedAnswer.objects.create(attempt=new_attempt, answer=answer)
+
                 if request.POST.get(str(answer.id)) == 'True':
                     correct += 1
                 elif request.POST.get(str(answer.id)) == 'False':
                     incorrect += 1
+
         total = correct + incorrect
         if total != 0:
-            score = Score(user=request.user, subject=subject, value=(correct / total)*100)
-            new_attempt.score = score
-            print(score.value)
-            score.save()
+            score_value = (correct / total)*100
+            new_attempt.score = score_value
+            new_attempt.save()
             return redirect('/ind_results/')
 
     return render(request, 'main/subject/take_subject_detail.html', {"subject":subject})
@@ -256,21 +261,45 @@ def take_subject_detail(request, pk):
 #Displays individual student's scores
 @login_required(login_url="/login")
 def ind_results(request):
-    scores = Score.objects.all()
-    counter = 0
-    for score in scores:
-        if request.user == score.user:
-            counter += 1
 
-    return render(request, 'main/results/ind_results.html', {"scores":scores, "counter":counter})
+    subjects = Subject.objects.all()
+    attempts = Attempt.objects.all()
+
+    user_attempts = []
+    subjects_taken = []
+    none_taken = False
+    
+
+    for attempt in attempts:
+        #allows the template to only display attempts made by the user that's logged in
+        if attempt.student == request.user:
+            user_attempts.append(attempt)
+        #same thing for subjects
+        if attempt.subject not in subjects_taken and attempt.student == request.user:
+            subjects_taken.append(attempt.subject)
+
+    aa = {}
+    for attempt in user_attempts:
+        attempt_subject = attempt.subject
+        for question in attempt_subject.questions.all():
+            for attempted_answer in attempt.attempted_answers.all():
+                aa.update({attempted_answer.answer : attempt})
+
+    if len(subjects_taken) == 0:
+        none_taken = True
+
+
+
+    return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "subjects_taken":subjects_taken, "aa":aa, "none_taken":none_taken})
 
 
 #Displays all students' scores
 @login_required(login_url="/login")
 def group_results(request):
     subjects = Subject.objects.all()
-    scores = Score.objects.all()
-    return render(request, 'main/results/group_results.html', {"subjects":subjects, "scores":scores})
+    attemptedAnswers = AttemptedAnswer.objects.all()
+
+    return render(request, 'main/results/group_results.html', {"subjects":subjects, "attemptedAnswers":attemptedAnswers})
 
 
 
