@@ -24,7 +24,7 @@
             <h6 class="card-subtitle mb-2 text-body-secondary">{{post.author}}</h6>
             <h6 class="card-title" style="margin-top:15px">{{post.title}}</h6>
             <p class="card-text" style="display:inline">{{post.description}}</p>
-            <br><br>
+            <br>
 
             {% if post.files.count > 0 %}
             <a href="{% url 'file_view' post.pk %}" style="text-decoration:none">{{post.files.count}} file(s) attached</a>

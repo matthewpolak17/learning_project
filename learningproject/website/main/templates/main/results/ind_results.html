@@ -4,15 +4,21 @@
 {% load filters %}
 {% block content %}
 
-<div style="width:60%; margin:auto">
+<div style="width:70%; margin:auto">
     <br>
-    <h4>Results</h4>
+    <div>
+        <h4 style="margin-right:15px; float:left; margin-top:10px">{{user.get_short_name}}'s Results</h4>
+        <form method="get" action="{% url 'ind_results'%}" class="form-inline">
+            <button type="submit" class="btn btn-outline-primary" style="float:right; margin-left:10px">Submit</button>
+            <input type="text" name="search" class="form-control" placeholder="Looking for a subject?" style="float:right; width:30%">
+        </form>
+    </div><br><br>
     <hr>
     <p>**Selected answers are highlighted in <span style="color:blue">blue</span></p>
     <br>
 
     {% if none_taken%}
-    <h5>It looks like you haven't studied any subjects yet...</h5>
+    <h5 style="text-align:center">No results to view...</h5>
     {% endif %}
 
     {% for subject in subjects_taken %}

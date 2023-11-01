@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from .forms import AnswerForm, QuestionForm, SubjectSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
-from .models import AttemptedAnswer, Post, File, Question, Subject, Attempt
+from .models import AttemptedAnswer, Post, File, Question, Subject, Attempt, User
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -260,7 +260,7 @@ def take_subject_detail(request, pk):
 
 #Displays individual student's scores
 @login_required(login_url="/login")
-def ind_results(request):
+def ind_results(request, pk):
 
     subjects = Subject.objects.all()
     attempts = Attempt.objects.all()
@@ -268,14 +268,20 @@ def ind_results(request):
     user_attempts = []
     subjects_taken = []
     none_taken = False
-    
+
+    search = request.GET.get('search')
+
+    if request.user.is_teacher:
+        student = User.objects.get(id=pk)
+    else:
+        student = request.user
 
     for attempt in attempts:
         #allows the template to only display attempts made by the user that's logged in
-        if attempt.student == request.user:
+        if attempt.student == student:
             user_attempts.append(attempt)
         #same thing for subjects
-        if attempt.subject not in subjects_taken and attempt.student == request.user:
+        if attempt.subject not in subjects_taken and attempt.student == student:
             subjects_taken.append(attempt.subject)
 
     aa = {}
@@ -285,10 +291,11 @@ def ind_results(request):
             for attempted_answer in attempt.attempted_answers.all():
                 aa.update({attempted_answer.answer : attempt})
 
+    if (search):
+        subjects_taken = Subject.objects.filter(title__icontains=search)
+
     if len(subjects_taken) == 0:
         none_taken = True
-
-
 
     return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "subjects_taken":subjects_taken, "aa":aa, "none_taken":none_taken})
 
@@ -297,9 +304,29 @@ def ind_results(request):
 @login_required(login_url="/login")
 def group_results(request):
     subjects = Subject.objects.all()
-    attemptedAnswers = AttemptedAnswer.objects.all()
+    attempts = Attempt.objects.all()
 
-    return render(request, 'main/results/group_results.html', {"subjects":subjects, "attemptedAnswers":attemptedAnswers})
+    students = []
+    aa = []
+
+    for subject in subjects:
+        for attempt in subject.attempts.all():
+                if attempt.student not in students:
+                    students.append(attempt.student)
+                    attemptsMade = subject.attempts.filter(student=attempt.student).count()
+
+                    aa.append({
+                        "subject":subject,
+                        "student":attempt.student,
+                        "attemptsMade":attemptsMade
+                    })
+
+        students = []
+        
+
+
+
+    return render(request, 'main/results/group_results.html', {"subjects":subjects, "attempts":attempts, "aa":aa})
 
 
 

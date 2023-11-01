@@ -23,7 +23,7 @@ urlpatterns = [
     path('take_subject_detail/<int:pk>', views.take_subject_detail, name="take_subject_detail"),
 
     ###result viewing
-    path('ind_results/', views.ind_results, name="ind_results"),
+    path('ind_results/<int:pk>', views.ind_results, name="ind_results"),
     path('group_results/', views.group_results, name="group_results"),
 
 ]
