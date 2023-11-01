@@ -81,7 +81,7 @@ class Answer(models.Model):
 #attempt model
 class Attempt(models.Model):
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, null=True, related_name="attempts", on_delete=models.CASCADE)
     number = models.IntegerField(default=0)
     score = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
 
