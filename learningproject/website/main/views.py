@@ -260,7 +260,7 @@ def take_subject_detail(request, pk):
 
 #Displays individual student's scores
 @login_required(login_url="/login")
-def ind_results(request, pk):
+def ind_results(request):
 
     subjects = Subject.objects.all()
     attempts = Attempt.objects.all()
@@ -271,17 +271,12 @@ def ind_results(request, pk):
 
     search = request.GET.get('search')
 
-    if request.user.is_teacher:
-        student = User.objects.get(id=pk)
-    else:
-        student = request.user
-
     for attempt in attempts:
         #allows the template to only display attempts made by the user that's logged in
-        if attempt.student == student:
+        if attempt.student == request.user:
             user_attempts.append(attempt)
         #same thing for subjects
-        if attempt.subject not in subjects_taken and attempt.student == student:
+        if attempt.subject not in subjects_taken and attempt.student == request.user:
             subjects_taken.append(attempt.subject)
 
     aa = {}
@@ -313,20 +308,52 @@ def group_results(request):
         for attempt in subject.attempts.all():
                 if attempt.student not in students:
                     students.append(attempt.student)
-                    attemptsMade = subject.attempts.filter(student=attempt.student).count()
+                    numOfAttemptsMade = subject.attempts.filter(student=attempt.student).count()
+                    attemptsMade = subject.attempts.filter(student=attempt.student)
 
                     aa.append({
                         "subject":subject,
                         "student":attempt.student,
+                        "numOfAttemptsMade":numOfAttemptsMade,
                         "attemptsMade":attemptsMade
                     })
-
         students = []
+
+    return render(request, 'main/results/group_results.html', {"subjects":subjects, "attempts":attempts, "aa":aa})
+
+
+@login_required(login_url="/login")
+def group_results_detail(request, subject_id, student_id):
+    attempts = Attempt.objects.all()
+    subject = Subject.objects.get(pk=subject_id)
+    questions = Question.objects.filter(subject=subject)
+    student_name = ""
+
+    attemptsMade = []
+    aa = {}
+
+    for attempt in attempts:
+        if attempt.student.id == student_id and attempt.subject == subject:
+            attemptsMade.append(attempt)
+            student_name = attempt.student
+
+    print(student_name)
+
+
+    for attempt in attemptsMade:
+        for question in questions:
+            for attempted_answer in attempt.attempted_answers.all():
+                aa.update({attempted_answer.answer : attempt})
+
+
+
+    return render(request, 'main/results/group_results_detail.html', {"attemptsMade":attemptsMade, "subject":subject, "questions":questions, "aa":aa})
+
+
         
 
 
 
-    return render(request, 'main/results/group_results.html', {"subjects":subjects, "attempts":attempts, "aa":aa})
 
 
 

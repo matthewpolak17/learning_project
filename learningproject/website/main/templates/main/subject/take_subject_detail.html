@@ -6,17 +6,15 @@
   <br><br>
   <h4>{{subject.title}}</h4>
   <hr>
-  
       <form method='POST'>
           {% csrf_token %}
           {% for question in subject.questions.all %}
-          <br>
             <div class="form-group">
-              <label style="font-weight:bold">{{question.text}}</label><br><br>
+              <label style="font-weight:bold; margin-bottom:10px">{{question.text}}</label><br>
                 {% for answer in question.answers.all %}
                 <input type="checkbox" id="{{answer.id}}" value="{{answer.is_correct}}" name="{{answer.pk}}">
                 <label for="{{answer.id}}">{{answer.text}}</label><br>
-                {% endfor %}
+                {% endfor %}<br>
             </div>
           {% endfor %}<br>
           <button type="sumbit" class="btn btn-outline-primary">Submit</button><br><br>

@@ -1,20 +1,27 @@
 {% extends 'main/base.html'%}
-{% block title %}Group Setup{% endblock %}
+{% block title %}Group Results{% endblock %}
 {% load crispy_forms_tags %}
 {% block content %}
 
-<div style="width:60%; margin:auto">
+<div style="width:65%; margin:auto">
     <br>
-    <h4 style="text-align:center" class="display-6">Group Results</h4>
+    <h3 style="text-align:center">Group Results</h3><hr>
     <br>
     {% for subject in subjects %}
-        <h1>{{subject.title}}</h1>
-        {% for item in aa %}
-            {% if item.subject == subject %}
-            <b>{{item.student}}</b>
-            <a href="{% url 'ind_results' item.student.pk %}">View {{item.attemptsMade}} attempt(s)</a><br>
-            {% endif %}
-        {% endfor %}
+    <div style="display:flex; width:80%; margin:auto">
+        <h3 style="color:rgb(0, 58, 105)">{{subject.title}}</h3>
+        <div class="card" style="padding:15px; width:70%; margin:auto">
+            {% for item in aa %}
+                {% if item.subject == subject %}
+                <div style="width:100%; margin:auto">
+                    <b style="float:left">{{item.student}}</b>
+                    <a href="{% url 'group_results_detail' subject.id item.student.id %}" style="float:right">View {{item.numOfAttemptsMade}} attempt(s)</a><br>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div><br><br>
     {% endfor %}
+    
 </div>
 {% endblock %}

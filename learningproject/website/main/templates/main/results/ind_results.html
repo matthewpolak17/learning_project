@@ -26,7 +26,7 @@
         {% for a in user_attempts %}
         {% if a.subject == subject%}
         <div class="card" style="padding:20px; margin-top:15px">
-            <h5 style="text-align:center">Attempt {{a.number}}</h5><hr>
+        <h5 style="text-align:center">Attempt {{a.number}}</h5><hr>
             {% for question in subject.questions.all %}
                 <p style="font-weight:bold">{{question.text}}</p>
                 {% for answer in question.answers.all %}
