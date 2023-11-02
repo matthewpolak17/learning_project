@@ -10,11 +10,13 @@
     <hr>
     
     {% for item in subjects_with_attempts %}
+    <div>
         {% if item.attemptsRem > 0 %}
-            <p><a href="{% url 'take_subject_detail' item.subject.pk %}">{{item.subject.title}}</a>  Attempts Remaining: {{item.attemptsRem}}</p>
+        <p><a href="{% url 'take_subject_detail' item.subject.pk %}">{{item.subject.title}}</a>  Attempts Remaining: {{item.attemptsRem}}</p>
         {% else %}
-            <p>{{item.subject.title}}  Attempts Remaining: {{item.attemptsRem}}</p>
+        <p>{{item.subject.title}}  Attempts Remaining: {{item.attemptsRem}}</p>
         {% endif %}
+    </div>
     {% endfor %}
 </div>
 

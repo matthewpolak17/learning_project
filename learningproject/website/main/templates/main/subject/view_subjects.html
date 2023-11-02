@@ -8,9 +8,11 @@
     <br>
     <h4>Subjects Posted</h4>
     <hr><br>
-    {% for subject in subjects %}
-        <a href="{% url 'question_setup' subject.pk %}">{{ subject.title }}</a><br><br>
-    {% endfor %}
+    <ul style="width:80%; margin:auto">
+        {% for subject in subjects %}
+        <li style="font-size:15pt">{{subject.title}}<a href="{% url 'question_setup' subject.pk %}" style="float:right; text-decoration:none">Edit</a></li><hr>
+        {% endfor %}
+    </ul>
 </div>
     
 {% endblock %}
