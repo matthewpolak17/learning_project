@@ -23,7 +23,7 @@ class Post(models.Model):
 #reply model
 class Reply(models.Model):
     post = models.ForeignKey(Post, related_name="replies", on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE) #different from the author of the post / reply_author
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
