@@ -30,11 +30,12 @@
             {% for question in subject.questions.all %}
                 <p style="font-weight:bold">{{question.text}}</p>
                 {% for answer in question.answers.all %}
-                    {% if answer in aa and aa|get_item:answer == a %}
-                        <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                    {% else %}
-                        <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                    {% endif %}
+                    {% for aa in attempted_answers %}
+                        {% if aa.answer == answer and aa.answer.question == question and aa.attempt == a and aa.answer.question.subject == subject and aa.attempt.student == student%}
+                            <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                        {% endif %}
+                    {% endfor %}
+                    <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
                 {% endfor %}
                 <hr>
             {% endfor %}
