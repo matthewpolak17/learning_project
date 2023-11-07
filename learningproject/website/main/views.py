@@ -264,6 +264,8 @@ def ind_results(request):
 
     subjects = Subject.objects.all()
     attempts = Attempt.objects.all()
+    attempted_answers = AttemptedAnswer.objects.all()
+    student = request.user
 
     user_attempts = []
     subjects_taken = []
@@ -292,7 +294,13 @@ def ind_results(request):
     if len(subjects_taken) == 0:
         none_taken = True
 
-    return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "subjects_taken":subjects_taken, "aa":aa, "none_taken":none_taken})
+    for aa in attempted_answers:
+        print(aa.attempt.student)
+        print(aa.answer.question.subject)
+        print(aa.answer.question.text)
+        print(aa.answer.text)
+
+    return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "subjects_taken":subjects_taken, "none_taken":none_taken, "attempted_answers":attempted_answers, "student":student})
 
 
 #Displays all students' scores
