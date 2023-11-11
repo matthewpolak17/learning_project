@@ -6,23 +6,25 @@
 <div style="width:60%; margin:auto">
     <p></p>
     <br>
-    <h3 style="text-align:center; color:rgb(0, 58, 105)">{{subject.title}}</h3><hr>
+    <h3 style="text-align:center; color:rgb(0, 58, 105)">{{quiz.title}}</h3><hr>
     <p>**Selected answers are highlighted in <span style="color:blue">blue</span></p><br>
-    {% for attempt in attemptsMade %}
+    {% for a in user_attempts %}
     <div class="card" style="padding:20px; margin-top:15px">
-        <h5 style="text-align:center">Attempt #{{attempt.number}}</h5><hr>
-        {% for question in subject.questions.all %}
+        <h5 style="text-align:center">Attempt #{{a.number}}</h5><hr>
+        {% for question in quiz.questions.all %}
         <p style="font-weight:bold">{{question.text}}</p>
             {% for answer in question.answers.all %}
-                {% if answer in aa and aa|get_item:answer == attempt %}
-                <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                {% else %}
-                <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                {% endif %}
+                {% with attempted=answer|is_attempted:a %}
+                    {% if attempted %}
+                        <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                    {% else %}
+                        <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                    {% endif %}
+                {% endwith %}
             {% endfor %}
             <hr>
         {% endfor %}
-        <h5 style="text-align:center">Score: {{attempt.score}}%</h5>
+        <h5 style="text-align:center">Score: {{a.score}}%</h5>
     </div><br>
     {% endfor %}
 </div><br>

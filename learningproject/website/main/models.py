@@ -51,11 +51,18 @@ class File(models.Model):
             return "msword"
         elif (type_tuple[0]).__contains__("vnd.openxmlformats-officedocument.wordprocessingml.document"):
             return "document"
-
+        
 #subject model
 class Subject(models.Model):
-    teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
+    teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+
+
+#quiz model
+class Quiz(models.Model):
+    subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    weight = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
     max_attempts = models.IntegerField(default=3)
 
     def __str__(self):
@@ -63,7 +70,7 @@ class Subject(models.Model):
 
 #question model
 class Question(models.Model):
-    subject = models.ForeignKey(Subject, related_name="questions", on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, related_name="questions", null=True, on_delete=models.CASCADE)
     text = models.CharField('Question', max_length=255, blank=True)
 
     def __str__(self):
@@ -81,7 +88,7 @@ class Answer(models.Model):
 #attempt model
 class Attempt(models.Model):
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, null=True, related_name="attempts", on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, null=True, related_name="attempts", on_delete=models.CASCADE)
     number = models.IntegerField(default=0)
     score = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
 
