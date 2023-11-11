@@ -3,25 +3,25 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<div style="width:65%; margin:auto">
+<div style="width:80%; margin:auto">
     <br>
     <h3 style="text-align:center">Group Results</h3><hr>
     <br>
-    {% for subject in subjects %}
-    <div style="display:flex; width:80%; margin:auto">
-        <h3 style="color:rgb(0, 58, 105)">{{subject.title}}</h3>
-        <div class="card" style="padding:15px; width:70%; margin:auto">
-            {% for item in aa %}
-                {% if item.subject == subject %}
-                <div style="width:100%; margin:auto">
-                    <b style="float:left">{{item.student}}</b>
-                    <a href="{% url 'group_results_detail' subject.id item.student.id %}" style="float:right">View {{item.numOfAttemptsMade}} attempt(s)</a><br>
-                </div>
-                {% endif %}
-            {% endfor %}
+        {% for quiz in quizzes %}
+        <div style="width:60%; margin:auto">
+            <h3 style="color:rgb(0, 58, 105)">{{quiz.title}}</h3>
+            <div class="card" style="padding:15px">
+                {% for item in aa %}
+                    {% if item.quiz == quiz %}
+                    <div style="width:100%; margin:auto">
+                        <b>{{item.student}}</b>
+                        <a href="{% url 'group_results_detail' quiz.id item.student.id %}" style="float:right">View {{item.numOfAttemptsMade}} attempt(s)</a><br>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
-    </div><br><br>
-    {% endfor %}
-    
+        <br><br>
+        {% endfor %}
 </div>
 {% endblock %}

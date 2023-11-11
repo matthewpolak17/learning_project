@@ -1,0 +1,24 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Group Scores{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:50%; margin:auto"><br>
+<h3>Group scores page</h3>
+<p>**Displays the highest score for a student</p><br>
+    {% for quiz in quizzes %}
+    <div class = card style="padding:15px">
+    <h4>{{quiz.title}}</h4>
+        {% for student in students %}
+            {% for item in dic %}
+                {% if item.student == student and item.quiz == quiz %}
+                    <p>{{item.student}} - {{item.highest_score}}%</p>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div><br>
+{% endfor %}
+</div>
+
+{% endblock %}
