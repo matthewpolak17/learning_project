@@ -1,9 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm
+from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm, SubjectForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
-from .models import AttemptedAnswer, Post, File, Question, Attempt, User, Quiz
+from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Subject, User, Quiz
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -126,18 +126,20 @@ def create_post(request):
 
 #Screen that prompts the user to create a quiz
 @login_required(login_url="/login")
-def quiz_setup(request):
+def quiz_setup(request, pk):
+    subject = Subject.objects.get(id=pk)
     #quiz creation form
     if request.method == 'POST':
         form = QuizSetupForm(request.POST)
         if form.is_valid():
             setup = form.save(commit=False)
             setup.teacher = request.user
+            setup.subject = subject
             setup.save()
-            return redirect("/question_setup/" + str(setup.id))
+            return redirect("/question_setup/" + str(setup.id), {"subject":subject })
     else:
         form = QuizSetupForm()
-    return render(request, 'main/quiz/quiz_setup.html', {"form":form})
+    return render(request, 'main/quiz/quiz_setup.html', {"form":form, "subject":subject })
 
 
 #Screen that prompts the user to add questions to their quiz
@@ -184,9 +186,11 @@ def answer_setup(request, pk):
 
 #Pulls up a list of all quizzes that have been posted
 @login_required(login_url="/login")
-def view_quizzes(request):
-    quizzes = Quiz.objects.all()
-    return render(request, 'main/quiz/view_quizzes.html', {"quizzes": quizzes})
+def view_quizzes(request, pk):
+    subject = Subject.objects.get(id=pk)
+    quizzes = Quiz.objects.filter(subject=subject)
+
+    return render(request, 'main/quiz/view_quizzes.html', {"quizzes": quizzes, "subject":subject })
 
 
 #Similar to view_quizzes, but directs exclusively students to a screen that
@@ -214,9 +218,10 @@ def content(request):
 def take_quiz_detail(request, pk):
 
     quiz = Quiz.objects.get(id=pk)
+    student = request.user
 
     #number of current attempts taken for a quiz
-    current_attempts = Attempt.objects.filter(student=request.user, quiz=quiz).count()
+    current_attempts = Attempt.objects.filter(student=student, quiz=quiz).count()
 
     if (current_attempts >= quiz.max_attempts):
         return redirect('/content/')
@@ -226,7 +231,6 @@ def take_quiz_detail(request, pk):
     total = 0
     #take quiz form
     if request.method == 'POST':
-        print(request.POST)
         new_attempt = Attempt(student=request.user, quiz=quiz, number=current_attempts+1)
         new_attempt.save()
 
@@ -247,11 +251,19 @@ def take_quiz_detail(request, pk):
             score_value = (correct / total)*100
             new_attempt.score = score_value
             new_attempt.save()
+            updateGrade(new_attempt, student)
             return redirect('/ind_results/')
 
     return render(request, 'main/quiz/take_quiz_detail.html', {"quiz":quiz})
 
 
+def updateGrade(new_attempt, student):
+    grade = Grade.objects.get(student=student, subject=new_attempt.quiz.subject)
+
+    if (grade):
+        return
+    else:
+        return
 
 ###----------------------------------------------------------------------------------###
 ### Results posted from quizzes
@@ -356,6 +368,25 @@ def group_scores(request):
 
 
     return render(request, 'main/scores/group_scores.html', {"quizzes":quizzes, "students":students, "dic":dic})
+
+###----------------------------------------------------------------------------------###
+### Subjects
+
+def subjects(request):
+
+    subjects = Subject.objects.all()
+
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.teacher = request.user
+            subject.save()
+            return redirect('/subjects/', {"subjects":subjects, "form":form })
+    else:
+        form = SubjectForm()
+
+    return render(request, 'main/subject/subjects.html', {"subjects":subjects, "form":form })
 
 
         

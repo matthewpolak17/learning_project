@@ -11,12 +11,12 @@ urlpatterns = [
     path('file_view/<int:pk>', views.file_view, name="file_view"),
 
     ###quiz creation
-    path('quiz_setup/', views.quiz_setup, name="quiz_setup"),
+    path('quiz_setup/<int:pk>', views.quiz_setup, name="quiz_setup"),
     path('question_setup/<int:pk>', views.question_setup, name='question_setup'),
     path('answer_setup/<int:pk>', views.answer_setup, name='answer_setup'),
 
     ###quiz viewing
-    path('view_quizzes/', views.view_quizzes, name="view_quizzes"),
+    path('view_quizzes/<int:pk>', views.view_quizzes, name="view_quizzes"),
     path('content/', views.content, name="content"),
 
     ###quiz taking

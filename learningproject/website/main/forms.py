@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Post, Question, Quiz, Reply, User, Answer
+from .models import Post, Question, Quiz, Reply, Subject, User, Answer
 
 #registers a new user
 class RegisterForm(UserCreationForm):
@@ -51,7 +51,7 @@ class ReplyForm(forms.ModelForm):
 class QuizSetupForm(forms.ModelForm):
     class Meta:
         model = Quiz
-        fields = ["title",]
+        fields = ["title", "weight"]
 
 #question creation form
 class QuestionForm(forms.ModelForm):
@@ -64,6 +64,12 @@ class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
         fields = ["text", "is_correct"]
+
+#subject creation form
+class SubjectForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+        fields = ["title"]
 
         
 
