@@ -10,6 +10,7 @@ urlpatterns = [
     path('reply/<int:pk>', views.reply, name="reply"),
     path('file_view/<int:pk>', views.file_view, name="file_view"),
 
+<<<<<<< Updated upstream
     ###subject creation
     path('subject_setup/', views.subject_setup, name="subject_setup"),
     path('question_setup/<int:pk>', views.question_setup, name='question_setup'),
@@ -17,6 +18,15 @@ urlpatterns = [
 
     ###subject viewing
     path('view_subjects/', views.view_subjects, name="view_subjects"),
+=======
+    ###quiz creation
+    path('quiz_setup/<int:pk>', views.quiz_setup, name="quiz_setup"),
+    path('question_setup/<int:pk>', views.question_setup, name='question_setup'),
+    path('answer_setup/<int:pk>', views.answer_setup, name='answer_setup'),
+
+    ###quiz viewing
+    path('view_quizzes/<int:pk>', views.view_quizzes, name="view_quizzes"),
+>>>>>>> Stashed changes
     path('content/', views.content, name="content"),
 
     ###subject taking

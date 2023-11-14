@@ -1,9 +1,16 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+<<<<<<< Updated upstream
 from .forms import AnswerForm, QuestionForm, SubjectSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from .models import AttemptedAnswer, Post, File, Question, Subject, Attempt, User
+=======
+from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm, SubjectForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout, authenticate
+from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Subject, User, Quiz
+>>>>>>> Stashed changes
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -126,18 +133,30 @@ def create_post(request):
 
 #Screen that prompts the user to create a subject
 @login_required(login_url="/login")
+<<<<<<< Updated upstream
 def subject_setup(request):
     #subject creation form
+=======
+def quiz_setup(request, pk):
+    subject = Subject.objects.get(id=pk)
+    #quiz creation form
+>>>>>>> Stashed changes
     if request.method == 'POST':
         form = SubjectSetupForm(request.POST)
         if form.is_valid():
             setup = form.save(commit=False)
             setup.teacher = request.user
+            setup.subject = subject
             setup.save()
-            return redirect("/question_setup/" + str(setup.id))
+            return redirect("/question_setup/" + str(setup.id), {"subject":subject })
     else:
+<<<<<<< Updated upstream
         form = SubjectSetupForm()
     return render(request, 'main/subject/subject_setup.html', {"form":form})
+=======
+        form = QuizSetupForm()
+    return render(request, 'main/quiz/quiz_setup.html', {"form":form, "subject":subject })
+>>>>>>> Stashed changes
 
 
 #Screen that prompts the user to add questions to their subject
@@ -184,9 +203,17 @@ def answer_setup(request, pk):
 
 #Pulls up a list of all subjects that have been posted
 @login_required(login_url="/login")
+<<<<<<< Updated upstream
 def view_subjects(request):
     subjects = Subject.objects.all()
     return render(request, 'main/subject/view_subjects.html', {"subjects": subjects})
+=======
+def view_quizzes(request, pk):
+    subject = Subject.objects.get(id=pk)
+    quizzes = Quiz.objects.filter(subject=subject)
+
+    return render(request, 'main/quiz/view_quizzes.html', {"quizzes": quizzes, "subject":subject })
+>>>>>>> Stashed changes
 
 
 #Similar to view_subjects, but directs exclusively students to a screen that
@@ -213,10 +240,18 @@ def content(request):
 @login_required(login_url="/login")
 def take_subject_detail(request, pk):
 
+<<<<<<< Updated upstream
     subject = Subject.objects.get(id=pk)
 
     #number of current attempts taken for a subject
     current_attempts = Attempt.objects.filter(student=request.user, subject=subject).count()
+=======
+    quiz = Quiz.objects.get(id=pk)
+    student = request.user
+
+    #number of current attempts taken for a quiz
+    current_attempts = Attempt.objects.filter(student=student, quiz=quiz).count()
+>>>>>>> Stashed changes
 
     if (current_attempts >= subject.max_attempts):
         return redirect('/content/')
@@ -226,8 +261,12 @@ def take_subject_detail(request, pk):
     total = 0
     #take subject form
     if request.method == 'POST':
+<<<<<<< Updated upstream
         print(request.POST)
         new_attempt = Attempt(student=request.user, subject=subject, number=current_attempts+1)
+=======
+        new_attempt = Attempt(student=request.user, quiz=quiz, number=current_attempts+1)
+>>>>>>> Stashed changes
         new_attempt.save()
 
         questions = subject.questions.all()
@@ -248,11 +287,19 @@ def take_subject_detail(request, pk):
             score_value = (correct / total)*100
             new_attempt.score = score_value
             new_attempt.save()
+            updateGrade(new_attempt, student)
             return redirect('/ind_results/')
 
     return render(request, 'main/subject/take_subject_detail.html', {"subject":subject})
 
 
+def updateGrade(new_attempt, student):
+    grade = Grade.objects.get(student=student, subject=new_attempt.quiz.subject)
+
+    if (grade):
+        return
+    else:
+        return
 
 ###----------------------------------------------------------------------------------###
 ### Results posted from subjects
@@ -348,6 +395,25 @@ def group_results_detail(request, subject_id, student_id):
 
 
     return render(request, 'main/results/group_results_detail.html', {"attemptsMade":attemptsMade, "subject":subject, "questions":questions, "aa":aa})
+
+###----------------------------------------------------------------------------------###
+### Subjects
+
+def subjects(request):
+
+    subjects = Subject.objects.all()
+
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.teacher = request.user
+            subject.save()
+            return redirect('/subjects/', {"subjects":subjects, "form":form })
+    else:
+        form = SubjectForm()
+
+    return render(request, 'main/subject/subjects.html', {"subjects":subjects, "form":form })
 
 
         

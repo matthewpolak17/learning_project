@@ -1,0 +1,20 @@
+{% extends 'main/base.html'%}
+{% block title %}{{user.get_short_name}}'s Results{% endblock %}
+{% load crispy_forms_tags %}
+{% load filters %}
+{% block content %}
+<h3>Create Subject</h3><br>
+<form method="POST" name="subjectform">
+    {% csrf_token %}
+    {{form|crispy}}
+    <button type="sumbit" class="btn btn-outline-primary" name="submitform" >Submit</button>
+</form><br>
+
+    {% for subject in subjects %}
+        <p>{{subject.title}}</p>
+        <div style="display:flex">
+            <a style="margin-right:15px" href="{% url 'view_quizzes' subject.pk %}">View Quizzes</a><a href="{% url 'quiz_setup' subject.pk %}">Add Quiz</a>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

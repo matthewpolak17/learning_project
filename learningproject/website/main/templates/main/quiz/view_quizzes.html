@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+
+{% block title %}View Quiz{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:50%; margin:auto">
+    <br>
+    <p>subject: {{subject.title}}</p>
+    <h4>Quizzes Posted</h4>
+    <hr><br>
+    <ul style="width:80%; margin:auto">
+        {% for quiz in quizzes %}
+        <li style="font-size:15pt">{{quiz.title}} | {{quiz.weight}} pts<a href="{% url 'question_setup' quiz.pk %}" style="float:right; text-decoration:none">Edit</a></li><hr>
+        {% endfor %}
+    </ul>
+</div>
+    
+{% endblock %}
