@@ -251,19 +251,45 @@ def take_quiz_detail(request, pk):
             score_value = (correct / total)*100
             new_attempt.score = score_value
             new_attempt.save()
-            updateGrade(new_attempt, student)
+            updateGrade(new_attempt)
             return redirect('/ind_results/')
 
     return render(request, 'main/quiz/take_quiz_detail.html', {"quiz":quiz})
 
 
-def updateGrade(new_attempt, student):
-    grade = Grade.objects.get(student=student, subject=new_attempt.quiz.subject)
+def updateGrade(new_attempt):
+    
+    try:
+        grade = Grade.objects.get(student=new_attempt.student, subject=new_attempt.quiz.subject)
+    except Grade.DoesNotExist:
+        grade = None
 
-    if (grade):
-        return
-    else:
-        return
+    quizzes = new_attempt.quiz.subject.quizzes.all()
+
+    if (grade):     #if they need to update their grade
+
+        actual = 0
+        ideal = 0
+        for quiz in quizzes:
+            highest = 0
+
+            for attempt in quiz.attempts.all():
+                if attempt.score > highest:
+                    highest = attempt.score
+            
+            actual = actual + ((highest / 100) * quiz.weight)
+            ideal = ideal + quiz.weight
+
+        grade.score = actual / ideal
+        print(grade.score)
+        grade.save()
+
+    else:   #if they haven't been graded for a subject yet
+
+        #calculate grade here
+
+        grade = Grade(student=new_attempt.student, subject=new_attempt.quiz.subject, score=3) #fix this later
+        grade.save()
 
 ###----------------------------------------------------------------------------------###
 ### Results posted from quizzes
