@@ -23,7 +23,7 @@ class Post(models.Model):
 #reply model
 class Reply(models.Model):
     post = models.ForeignKey(Post, related_name="replies", on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE) #different from the author of the post / reply_author
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -51,13 +51,11 @@ class File(models.Model):
             return "msword"
         elif (type_tuple[0]).__contains__("vnd.openxmlformats-officedocument.wordprocessingml.document"):
             return "document"
-
+        
 #subject model
 class Subject(models.Model):
-    teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-<<<<<<< Updated upstream
     title = models.CharField(max_length=255)
-=======
+    teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -68,7 +66,6 @@ class Quiz(models.Model):
     subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     weight = models.DecimalField(null=True, max_digits=5, decimal_places=0)
->>>>>>> Stashed changes
     max_attempts = models.IntegerField(default=3)
 
     def __str__(self):
@@ -76,7 +73,7 @@ class Quiz(models.Model):
 
 #question model
 class Question(models.Model):
-    subject = models.ForeignKey(Subject, related_name="questions", on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, related_name="questions", null=True, on_delete=models.CASCADE)
     text = models.CharField('Question', max_length=255, blank=True)
 
     def __str__(self):
@@ -94,7 +91,7 @@ class Answer(models.Model):
 #attempt model
 class Attempt(models.Model):
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, null=True, related_name="attempts", on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, null=True, related_name="attempts", on_delete=models.CASCADE)
     number = models.IntegerField(default=0)
     score = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
 

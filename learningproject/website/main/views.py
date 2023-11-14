@@ -1,16 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-<<<<<<< Updated upstream
-from .forms import AnswerForm, QuestionForm, SubjectSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, logout, authenticate
-from .models import AttemptedAnswer, Post, File, Question, Subject, Attempt, User
-=======
 from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm, SubjectForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Subject, User, Quiz
->>>>>>> Stashed changes
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -128,21 +121,16 @@ def create_post(request):
 
 
 ###----------------------------------------------------------------------------------###
-### How subjects are created
+### How quizzes are created
 
 
-#Screen that prompts the user to create a subject
+#Screen that prompts the user to create a quiz
 @login_required(login_url="/login")
-<<<<<<< Updated upstream
-def subject_setup(request):
-    #subject creation form
-=======
 def quiz_setup(request, pk):
     subject = Subject.objects.get(id=pk)
     #quiz creation form
->>>>>>> Stashed changes
     if request.method == 'POST':
-        form = SubjectSetupForm(request.POST)
+        form = QuizSetupForm(request.POST)
         if form.is_valid():
             setup = form.save(commit=False)
             setup.teacher = request.user
@@ -150,28 +138,23 @@ def quiz_setup(request, pk):
             setup.save()
             return redirect("/question_setup/" + str(setup.id), {"subject":subject })
     else:
-<<<<<<< Updated upstream
-        form = SubjectSetupForm()
-    return render(request, 'main/subject/subject_setup.html', {"form":form})
-=======
         form = QuizSetupForm()
     return render(request, 'main/quiz/quiz_setup.html', {"form":form, "subject":subject })
->>>>>>> Stashed changes
 
 
-#Screen that prompts the user to add questions to their subject
+#Screen that prompts the user to add questions to their quiz
 @login_required(login_url="/login")
 def question_setup(request, pk):
-    subject = Subject.objects.get(id=pk)
-    questions = subject.questions.all()
+    quiz = Quiz.objects.get(id=pk)
+    questions = quiz.questions.all()
     #question creation form
     if request.method == 'POST' and 'submitform' in request.POST:
         form = QuestionForm(request.POST)
         if form.is_valid():
             question = form.save(commit=False)
-            question.subject = subject
+            question.quiz = quiz
             question.save()
-            return redirect('/answer_setup/' + str(question.id), {"form":form, "subject":subject, "questions":questions})
+            return redirect('/answer_setup/' + str(question.id), {"form":form, "quiz":quiz, "questions":questions})
     elif request.method == 'POST' and 'question-id' in request.POST:
         question_id = request.POST.get("question-id")
         Question.objects.filter(id=question_id).delete()
@@ -179,7 +162,7 @@ def question_setup(request, pk):
     else:
         form = QuestionForm()
 
-    return render(request, 'main/subject/question_setup.html', {"form":form, "subject":subject, "questions":questions})
+    return render(request, 'main/quiz/question_setup.html', {"form":form, "quiz":quiz, "questions":questions})
 
 
 #Screen that prompts the user to add answers to their question
@@ -198,81 +181,62 @@ def answer_setup(request, pk):
     else:
         form = AnswerForm()
     
-    return render(request, 'main/subject/answer_setup.html', {"answers":answers, "form":form, "question":question})
+    return render(request, 'main/quiz/answer_setup.html', {"answers":answers, "form":form, "question":question})
 
 
-#Pulls up a list of all subjects that have been posted
+#Pulls up a list of all quizzes that have been posted
 @login_required(login_url="/login")
-<<<<<<< Updated upstream
-def view_subjects(request):
-    subjects = Subject.objects.all()
-    return render(request, 'main/subject/view_subjects.html', {"subjects": subjects})
-=======
 def view_quizzes(request, pk):
     subject = Subject.objects.get(id=pk)
     quizzes = Quiz.objects.filter(subject=subject)
 
     return render(request, 'main/quiz/view_quizzes.html', {"quizzes": quizzes, "subject":subject })
->>>>>>> Stashed changes
 
 
-#Similar to view_subjects, but directs exclusively students to a screen that
-#allows them to take a subject
+#Similar to view_quizzes, but directs exclusively students to a screen that
+#allows them to take a quiz
 @login_required(login_url="/login")
 def content(request):
-    subjects = Subject.objects.all()
-    subjects_with_attempts = []
+    quizzes = Quiz.objects.all()
+    quizzes_with_attempts = []
 
-    for subject in subjects:
-        attemptsRem = subject.max_attempts - Attempt.objects.filter(student=request.user, subject=subject).count()
+    for quiz in quizzes:
+        attemptsRem = quiz.max_attempts - Attempt.objects.filter(student=request.user, quiz=quiz).count()
 
-        subjects_with_attempts.append({
-            "subject":subject,
+        quizzes_with_attempts.append({
+            "quiz":quiz,
             "attemptsRem":attemptsRem
         })
     
     
-    return render(request, 'main/subject/content.html', {"subjects":subjects, "subjects_with_attempts":subjects_with_attempts})
+    return render(request, 'main/quiz/content.html', {"quizzes":quizzes, "quizzes_with_attempts":quizzes_with_attempts})
 
 
-#This view pulls up a subject and calculates the student's score
+#This view pulls up a quiz and calculates the student's score
 #based on what they submit through a form
 @login_required(login_url="/login")
-def take_subject_detail(request, pk):
+def take_quiz_detail(request, pk):
 
-<<<<<<< Updated upstream
-    subject = Subject.objects.get(id=pk)
-
-    #number of current attempts taken for a subject
-    current_attempts = Attempt.objects.filter(student=request.user, subject=subject).count()
-=======
     quiz = Quiz.objects.get(id=pk)
     student = request.user
 
     #number of current attempts taken for a quiz
     current_attempts = Attempt.objects.filter(student=student, quiz=quiz).count()
->>>>>>> Stashed changes
 
-    if (current_attempts >= subject.max_attempts):
+    if (current_attempts >= quiz.max_attempts):
         return redirect('/content/')
 
     correct = 0
     incorrect = 0
     total = 0
-    #take subject form
+    #take quiz form
     if request.method == 'POST':
-<<<<<<< Updated upstream
-        print(request.POST)
-        new_attempt = Attempt(student=request.user, subject=subject, number=current_attempts+1)
-=======
         new_attempt = Attempt(student=request.user, quiz=quiz, number=current_attempts+1)
->>>>>>> Stashed changes
         new_attempt.save()
 
-        questions = subject.questions.all()
+        questions = quiz.questions.all()
         for question in questions:
-            answers = question.answers.all()
-            for answer in answers:
+            for answer in question.answers.all():
                 
                 if (str(answer.pk) in request.POST):
                     AttemptedAnswer.objects.create(attempt=new_attempt, answer=answer)
@@ -290,7 +254,7 @@ def take_subject_detail(request, pk):
             updateGrade(new_attempt, student)
             return redirect('/ind_results/')
 
-    return render(request, 'main/subject/take_subject_detail.html', {"subject":subject})
+    return render(request, 'main/quiz/take_quiz_detail.html', {"quiz":quiz})
 
 
 def updateGrade(new_attempt, student):
@@ -302,18 +266,19 @@ def updateGrade(new_attempt, student):
         return
 
 ###----------------------------------------------------------------------------------###
-### Results posted from subjects
+### Results posted from quizzes
 
 
-#Displays individual student's scores
+#Displays individual student's results
 @login_required(login_url="/login")
 def ind_results(request):
 
-    subjects = Subject.objects.all()
+    quizzes = Quiz.objects.all()
     attempts = Attempt.objects.all()
+    attempted_answers = AttemptedAnswer.objects.all()
 
     user_attempts = []
-    subjects_taken = []
+    quizzes_taken = []
     none_taken = False
 
     search = request.GET.get('search')
@@ -322,79 +287,87 @@ def ind_results(request):
         #allows the template to only display attempts made by the user that's logged in
         if attempt.student == request.user:
             user_attempts.append(attempt)
-        #same thing for subjects
-        if attempt.subject not in subjects_taken and attempt.student == request.user:
-            subjects_taken.append(attempt.subject)
-
-    aa = {}
-    for attempt in user_attempts:
-        attempt_subject = attempt.subject
-        for question in attempt_subject.questions.all():
-            for attempted_answer in attempt.attempted_answers.all():
-                aa.update({attempted_answer.answer : attempt})
+        #same thing for quizzes
+        if attempt.quiz not in quizzes_taken and attempt.student == request.user:
+            quizzes_taken.append(attempt.quiz)
 
     if (search):
-        subjects_taken = Subject.objects.filter(title__icontains=search)
+        quizzes_taken = Quiz.objects.filter(title__icontains=search)
 
-    if len(subjects_taken) == 0:
+    if len(quizzes_taken) == 0:
         none_taken = True
 
-    return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "subjects_taken":subjects_taken, "aa":aa, "none_taken":none_taken})
+    return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "quizzes_taken":quizzes_taken, "none_taken":none_taken, "attempted_answers":attempted_answers})
 
 
-#Displays all students' scores
+#Displays all students' results
 @login_required(login_url="/login")
 def group_results(request):
-    subjects = Subject.objects.all()
+    quizzes = Quiz.objects.all()
     attempts = Attempt.objects.all()
-
     students = []
     aa = []
 
-    for subject in subjects:
-        for attempt in subject.attempts.all():
+    for quiz in quizzes:
+        for attempt in quiz.attempts.all():
                 if attempt.student not in students:
                     students.append(attempt.student)
-                    numOfAttemptsMade = subject.attempts.filter(student=attempt.student).count()
-                    attemptsMade = subject.attempts.filter(student=attempt.student)
+                    numOfAttemptsMade = quiz.attempts.filter(student=attempt.student).count()
+                    attemptsMade = quiz.attempts.filter(student=attempt.student)
 
                     aa.append({
-                        "subject":subject,
+                        "quiz":quiz,
                         "student":attempt.student,
                         "numOfAttemptsMade":numOfAttemptsMade,
                         "attemptsMade":attemptsMade
                     })
         students = []
 
-    return render(request, 'main/results/group_results.html', {"subjects":subjects, "attempts":attempts, "aa":aa})
-
+    return render(request, 'main/results/group_results.html', {"quizzes":quizzes, "attempts":attempts, "aa":aa})
 
 @login_required(login_url="/login")
-def group_results_detail(request, subject_id, student_id):
+def group_results_detail(request, quiz_id, student_id):
     attempts = Attempt.objects.all()
-    subject = Subject.objects.get(pk=subject_id)
-    questions = Question.objects.filter(subject=subject)
-    student_name = ""
-
-    attemptsMade = []
-    aa = {}
+    quiz = Quiz.objects.get(pk=quiz_id)
+    attempted_answers = AttemptedAnswer.objects.all()
+    user_attempts = []
 
     for attempt in attempts:
-        if attempt.student.id == student_id and attempt.subject == subject:
-            attemptsMade.append(attempt)
-            student_name = attempt.student
+        if attempt.student.id == student_id and attempt.quiz == quiz:
+            user_attempts.append(attempt)
 
-    print(student_name)
+    return render(request, 'main/results/group_results_detail.html', {"user_attempts":user_attempts, "quiz":quiz, "attempted_answers":attempted_answers})
+
+###----------------------------------------------------------------------------------###
+### Scores posted from results
+
+def group_scores(request):
+    quizzes = Quiz.objects.all()
+    attempts = Attempt.objects.all()
+    students = []
+    dic = []
+
+    ##generates a list of available students
+    for attempt in attempts:
+        if attempt.student not in students:
+            students.append(attempt.student)
+
+    for quiz in quizzes:
+        for student in students:
+            highest_score = 0
+            for attempt in quiz.attempts.all():
+                if attempt.student == student and attempt.quiz == quiz:
+                    if attempt.score > highest_score:
+                        highest_score = attempt.score
+
+            dic.append({
+                "quiz":quiz,
+                "student":student,
+                "highest_score":highest_score,
+            })
 
 
-    for attempt in attemptsMade:
-        for question in questions:
-            for attempted_answer in attempt.attempted_answers.all():
-                aa.update({attempted_answer.answer : attempt})
-
-
-
-    return render(request, 'main/results/group_results_detail.html', {"attemptsMade":attemptsMade, "subject":subject, "questions":questions, "aa":aa})
+    return render(request, 'main/scores/group_scores.html', {"quizzes":quizzes, "students":students, "dic":dic})
 
 ###----------------------------------------------------------------------------------###
 ### Subjects

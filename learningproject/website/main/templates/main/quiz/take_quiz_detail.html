@@ -1,0 +1,23 @@
+{% extends 'main/base.html'%}
+{% block title %}{{quiz.title}}{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div style="width:70%; margin:auto">
+  <br>
+  <h4>{{quiz.title}}</h4>
+  <hr>
+      <form method='POST'>
+          {% csrf_token %}
+          {% for question in quiz.questions.all %}
+            <div class="form-group">
+              <label style="font-weight:bold; margin-bottom:10px">{{question.text}}</label><br>
+                {% for answer in question.answers.all %}
+                <input type="checkbox" id="{{answer.id}}" value="{{answer.is_correct}}" name="{{answer.pk}}">
+                <label for="{{answer.id}}">{{answer.text}}</label><br>
+                {% endfor %}<br>
+            </div>
+          {% endfor %}<br>
+          <button type="sumbit" class="btn btn-outline-primary">Submit</button><br><br>
+      </form><br>
+</div>
+{% endblock %}

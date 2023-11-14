@@ -1,11 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-<<<<<<< Updated upstream
-from .models import Post, Question, Subject, Reply, User, Answer
-=======
 from .models import Post, Question, Quiz, Reply, Subject, User, Answer
->>>>>>> Stashed changes
 
 #registers a new user
 class RegisterForm(UserCreationForm):
@@ -52,15 +48,10 @@ class ReplyForm(forms.ModelForm):
         fields = ["description",]
 
 #subject creation form
-class SubjectSetupForm(forms.ModelForm):
+class QuizSetupForm(forms.ModelForm):
     class Meta:
-<<<<<<< Updated upstream
-        model = Subject
-        fields = ["title",]
-=======
         model = Quiz
         fields = ["title", "weight"]
->>>>>>> Stashed changes
 
 #question creation form
 class QuestionForm(forms.ModelForm):

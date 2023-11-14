@@ -10,7 +10,7 @@
         <h4 style="margin-right:15px; float:left; margin-top:10px">{{user.get_short_name}}'s Results</h4>
         <form method="get" action="{% url 'ind_results'%}" class="form-inline">
             <button type="submit" class="btn btn-outline-primary" style="float:right; margin-left:10px">Submit</button>
-            <input type="text" name="search" class="form-control" placeholder="Looking for a subject?" style="float:right; width:30%">
+            <input type="text" name="search" class="form-control" placeholder="Looking for a quiz?" style="float:right; width:30%">
         </form>
     </div><br><br>
     <hr>
@@ -21,20 +21,22 @@
     <h5 style="text-align:center">No results to view...</h5>
     {% endif %}
 
-    {% for subject in subjects_taken %}
-        <h3 style="text-align:center; color:rgb(0, 58, 105)">{{subject.title}}</h3>
+    {% for quiz in quizzes_taken %}
+        <h3 style="text-align:center; color:rgb(0, 58, 105)">{{quiz.title}}</h3>
         {% for a in user_attempts %}
-        {% if a.subject == subject%}
+        {% if a.quiz == quiz%}
         <div class="card" style="padding:20px; margin-top:15px">
-        <h5 style="text-align:center">Attempt {{a.number}}</h5><hr>
-            {% for question in subject.questions.all %}
+        <h5 style="text-align:center">Attempt #{{a.number}}</h5><hr>
+            {% for question in quiz.questions.all %}
                 <p style="font-weight:bold">{{question.text}}</p>
                 {% for answer in question.answers.all %}
-                    {% if answer in aa and aa|get_item:answer == a %}
-                        <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                    {% else %}
-                        <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                    {% endif %}
+                    {% with attempted=answer|is_attempted:a%}
+                        {% if attempted %}
+                            <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                        {% else %}
+                            <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
+                        {% endif %}
+                    {% endwith %}
                 {% endfor %}
                 <hr>
             {% endfor %}
