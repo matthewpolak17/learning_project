@@ -57,12 +57,15 @@ class Subject(models.Model):
     title = models.CharField(max_length=255)
     teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.title
+
 
 #quiz model
 class Quiz(models.Model):
     subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    weight = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
+    weight = models.DecimalField(null=True, max_digits=5, decimal_places=0)
     max_attempts = models.IntegerField(default=3)
 
     def __str__(self):
@@ -97,3 +100,9 @@ class Attempt(models.Model):
 class AttemptedAnswer(models.Model):
     answer = models.ForeignKey(Answer, null=True, on_delete=models.CASCADE)
     attempt = models.ForeignKey(Attempt, null=True, related_name="attempted_answers", on_delete=models.CASCADE)
+
+#Grade model
+class Grade(models.Model):
+    subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    score = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=0)
