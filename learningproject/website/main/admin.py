@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AttemptedAnswer, Post, Reply, Subject, User, File, Quiz, Question, Attempt, Answer
+from .models import AttemptedAnswer, Post, Reply, Subject, User, File, Quiz, Question, Attempt, Answer, Grade
 
 #these models are displayed and can be manipulated
 #in the admin panel
@@ -13,3 +13,4 @@ admin.site.register(Answer)
 admin.site.register(Attempt)
 admin.site.register(AttemptedAnswer)
 admin.site.register(Subject)
+admin.site.register(Grade)
