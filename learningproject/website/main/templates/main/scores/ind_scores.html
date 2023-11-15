@@ -22,8 +22,13 @@
         {% for item in dic %}
             {% if item.subject == subject and item.quiz in subject.quizzes.all %}
                 <p>{{item.quiz.title}} | {{item.quiz.weight}}pts</p>
-                <p>{{item.highest_score}}</p>
+                {% if item.count != 0 %}
+                <p>{{item.highest_score}}%</p>
+                {% else %}
+                <p>Not attempted yet</p>
+                {% endif %}
             {% endif %}
         {% endfor %}
+        <br>
     {% endfor %}
 {% endblock %}

@@ -253,13 +253,13 @@ def take_quiz_detail(request, pk):
             score_value = (correct / total)*100
             new_attempt.score = score_value
             new_attempt.save()
-            updateGrade(new_attempt)
+            updateGrade(new_attempt, student)
             return redirect('/ind_results/')
 
     return render(request, 'main/quiz/take_quiz_detail.html', {"quiz":quiz})
 
 
-def updateGrade(new_attempt):
+def updateGrade(new_attempt, student):
     
     try:
         grade = Grade.objects.get(student=new_attempt.student, subject=new_attempt.quiz.subject)
@@ -276,17 +276,24 @@ def updateGrade(new_attempt):
             highest = 0
 
             for attempt in quiz.attempts.all():
-                if attempt.score > highest:
+                if attempt.score > highest and attempt.student == student:
                     highest = attempt.score
-            
-            actual = actual + ((Decimal(highest) / 100) * quiz.weight)
-            print(actual)
-            if quiz.attempts.all().count() != 0:
-                ideal = ideal + quiz.weight
-            print(ideal)
+            print("highest: " + str(highest))
 
-        grade.score = actual / ideal * 100
-        print(grade.score)
+            if quiz.attempts.filter(student=student).count() > 0:
+                ideal += quiz.weight
+            print("ideal: " + str(ideal))
+
+            actual = actual + ((Decimal(highest) / 100) * quiz.weight)
+            print("actual: " + str(actual))
+            
+            if ideal != 0:
+                grade.score = actual / ideal * 100
+                print("overall grade: " + str(grade.score))
+            else:
+                grade.score = 0
+                print("overall grade: " + str(grade.score))
+
         grade.save()
         
 
@@ -374,32 +381,26 @@ def group_results_detail(request, quiz_id, student_id):
 ### Scores posted from results
 
 def group_scores(request):
-    quizzes = Quiz.objects.all()
-    attempts = Attempt.objects.all()
-    students = []
+
+    order = request.GET.get('order', 'desc')
+
+    subjects = Subject.objects.all()
     dic = []
 
-    ##generates a list of available students
-    for attempt in attempts:
-        if attempt.student not in students:
-            students.append(attempt.student)
+    for subject in subjects:
 
-    for quiz in quizzes:
-        for student in students:
-            highest_score = 0
-            for attempt in quiz.attempts.all():
-                if attempt.student == student and attempt.quiz == quiz:
-                    if attempt.score > highest_score:
-                        highest_score = attempt.score
+        if order == 'asc':
+            grades = Grade.objects.filter(subject=subject).order_by('score')
+        else:
+            grades = Grade.objects.filter(subject=subject).order_by('-score')
 
-            dic.append({
-                "quiz":quiz,
-                "student":student,
-                "highest_score":highest_score,
-            })
+        dic.append({
+            "subject":subject,
+            "grades":grades
+        })
 
 
-    return render(request, 'main/scores/group_scores.html', {"quizzes":quizzes, "students":students, "dic":dic})
+    return render(request, 'main/scores/group_scores.html', {"dic":dic, "subjects":subjects})
 
 def ind_scores(request):
 
@@ -412,16 +413,19 @@ def ind_scores(request):
     for subject in subjects:
         for quiz in subject.quizzes.all():
             highest_score = 0
-
+            count = 0
             for attempt in quiz.attempts.all():
                 if attempt.student == student:
+                    count += 1
                     if attempt.score > highest_score:
                         highest_score = attempt.score
+                
 
             dic.append({
                 "subject":subject,
                 "quiz":quiz,
-                "highest_score":highest_score
+                "highest_score":highest_score,
+                "count":count
             })
 
     return render(request, 'main/scores/ind_scores.html', {"dic":dic, "subjects":subjects, "student":student, "grades":grades})
