@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm, SubjectForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
+from decimal import Decimal
 from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Subject, User, Quiz
 
 #this list contains all the users who have logged in
@@ -197,6 +198,7 @@ def view_quizzes(request, pk):
 #allows them to take a quiz
 @login_required(login_url="/login")
 def content(request):
+    subjects = Subject.objects.all()
     quizzes = Quiz.objects.all()
     quizzes_with_attempts = []
 
@@ -209,7 +211,7 @@ def content(request):
         })
     
     
-    return render(request, 'main/quiz/content.html', {"quizzes":quizzes, "quizzes_with_attempts":quizzes_with_attempts})
+    return render(request, 'main/quiz/content.html', {"quizzes":quizzes, "quizzes_with_attempts":quizzes_with_attempts, "subjects":subjects})
 
 
 #This view pulls up a quiz and calculates the student's score
@@ -266,7 +268,7 @@ def updateGrade(new_attempt):
 
     quizzes = new_attempt.quiz.subject.quizzes.all()
 
-    if (grade):     #if they need to update their grade
+    if (grade):#if they need to update their grade
 
         actual = 0
         ideal = 0
@@ -277,19 +279,23 @@ def updateGrade(new_attempt):
                 if attempt.score > highest:
                     highest = attempt.score
             
-            actual = actual + ((highest / 100) * quiz.weight)
-            ideal = ideal + quiz.weight
+            actual = actual + ((Decimal(highest) / 100) * quiz.weight)
+            print(actual)
+            if quiz.attempts.all().count() != 0:
+                ideal = ideal + quiz.weight
+            print(ideal)
 
-        grade.score = actual / ideal
+        grade.score = actual / ideal * 100
         print(grade.score)
         grade.save()
+        
 
-    else:   #if they haven't been graded for a subject yet
+    else:#if they haven't been graded for a subject yet
 
-        #calculate grade here
-
-        grade = Grade(student=new_attempt.student, subject=new_attempt.quiz.subject, score=3) #fix this later
+        #set the grade equal to the score of their first quiz
+        grade = Grade(student=new_attempt.student, subject=new_attempt.quiz.subject, score=new_attempt.score)
         grade.save()
+        print(grade.score)
 
 ###----------------------------------------------------------------------------------###
 ### Results posted from quizzes
@@ -395,6 +401,30 @@ def group_scores(request):
 
     return render(request, 'main/scores/group_scores.html', {"quizzes":quizzes, "students":students, "dic":dic})
 
+def ind_scores(request):
+
+    subjects = Subject.objects.all()
+    student = request.user
+    grades = Grade.objects.all()
+
+    dic = []
+
+    for subject in subjects:
+        for quiz in subject.quizzes.all():
+            highest_score = 0
+
+            for attempt in quiz.attempts.all():
+                if attempt.student == student:
+                    if attempt.score > highest_score:
+                        highest_score = attempt.score
+
+            dic.append({
+                "subject":subject,
+                "quiz":quiz,
+                "highest_score":highest_score
+            })
+
+    return render(request, 'main/scores/ind_scores.html', {"dic":dic, "subjects":subjects, "student":student, "grades":grades})
 ###----------------------------------------------------------------------------------###
 ### Subjects
 

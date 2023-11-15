@@ -29,6 +29,7 @@ urlpatterns = [
 
     ###score viewing
     path('group_scores/', views.group_scores, name="group_scores"),
+    path('ind_scores/', views.ind_scores, name="ind_scores"),
 
     ###subjects
     path('subjects/', views.subjects, name="subjects"),

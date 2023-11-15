@@ -1,0 +1,29 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Individual Scores{% endblock %}
+{% load crispy_forms_tags %}
+{% load grade_tags %}
+
+{% block content %}
+
+    <h3>{{student}}'s Scores</h3>
+    <p>**Displays the highest score among all attempts</p><hr><br>
+
+    {% for subject in subjects %}
+    <div style="display:flex">
+        <h4 style="margin-right:20px">{{subject.title}}</h4>
+        {% for grade in grades %}
+            {% if grade.student == student and grade.subject == subject %}
+            <p>{{grade.score}} {% convert_to_letter_grade grade.score %}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <hr>
+        {% for item in dic %}
+            {% if item.subject == subject and item.quiz in subject.quizzes.all %}
+                <p>{{item.quiz.title}} | {{item.quiz.weight}}pts</p>
+                <p>{{item.highest_score}}</p>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endblock %}
