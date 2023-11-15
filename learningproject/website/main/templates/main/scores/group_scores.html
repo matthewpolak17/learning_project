@@ -6,18 +6,30 @@
 {% block content %}
 <div style="width:50%; margin:auto"><br>
 <h3>Group scores page</h3>
-<p>**Displays the highest score for a student</p><br>
-    {% for quiz in quizzes %}
-    <div class = card style="padding:15px">
-    <h4>{{quiz.title}}</h4>
-        {% for student in students %}
-            {% for item in dic %}
-                {% if item.student == student and item.quiz == quiz %}
-                    <p>{{item.student}} - {{item.highest_score}}%</p>
-                {% endif %}
-            {% endfor %}
+<p>**Displays the grades for each subject</p>
+<form method="get" action="">
+    <label for="order">Order</label>
+    <select name="order">
+        <option value="" disabled selected>Select</option>
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+        <option value="high">Highest</option>
+        <option value="low">Lowest</option>
+        <option value="average">Average</option>
+    </select>
+    <button type="submit">Sort</button>
+</form>
+
+{% for item in dic %}
+    <p style="font-weight:bold">{{item.subject.title}}</p>
+    {% if item.grades.count == 0 %}
+    <p>No attempts yet</p>
+    {% else %}
+        {% for grade in item.grades %}
+            <p>{{grade.student}} | {{grade.score}}</p>
         {% endfor %}
-    </div><br>
+    {% endif %}
+    <hr>
 {% endfor %}
 </div>
 
