@@ -7,16 +7,22 @@
 
 <div style="width:50%; margin:auto">
     <br>
-    <h4>Quizzes Left to Take</h4>
+    <h4>Content</h4>
     <hr><br>
-    
+
     <ul style="width:80%; margin:auto">
-        {% for item in quizzes_with_attempts %}
-            {% if item.attemptsRem > 0 %}
-                <li style="font-size:15pt"><a href="{% url 'take_quiz_detail' item.quiz.pk %}">{{item.quiz.title}}</a>  <span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li><hr>
-            {% else %}
-                <li style="font-size:15pt">{{item.quiz.title}}  <span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li><hr>
-            {% endif %}
+        {% for subject in subjects %}
+        <h4>{{subject.title}}</h4>
+            {% for item in quizzes_with_attempts %}
+                {% if item.quiz.subject == subject %}
+                    {% if item.attemptsRem > 0 %}
+                        <li style="font-size:15pt"><a href="{% url 'take_quiz_detail' item.quiz.pk %}">{{item.quiz.title}}</a>  <span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li><hr>
+                    {% else %}
+                        <li style="font-size:15pt">{{item.quiz.title}}<span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li><hr>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            <br>
         {% endfor %}
     </ul>
 </div>
