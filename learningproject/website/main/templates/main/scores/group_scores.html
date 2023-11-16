@@ -19,18 +19,24 @@
     </select>
     <button type="submit">Sort</button>
 </form>
-
-{% for item in dic %}
-    <p style="font-weight:bold">{{item.subject.title}}</p>
-    {% if item.grades.count == 0 %}
-    <p>No attempts yet</p>
-    {% else %}
-        {% for grade in item.grades %}
-            <p>{{grade.student}} | {{grade.score}}</p>
-        {% endfor %}
-    {% endif %}
-    <hr>
-{% endfor %}
+{% if avg %}
+    {% for item in avg %}
+        <p style="font-weight:bold">{{item.subject.title}}</p>
+        <p>Average: {{item.average}}</p>
+    {% endfor %}
+{% else %}
+    {% for item in dic %}
+        <p style="font-weight:bold">{{item.subject.title}}</p>
+        {% if item.grades.count == 0 %}
+            <p>No attempts yet</p>
+        {% else %}
+            {% for grade in item.grades %}
+                <p>{{grade.student}} | {{grade.score}}</p>
+            {% endfor %}
+        {% endif %}
+        <hr>
+    {% endfor %}
+{% endif %}
 </div>
 
 {% endblock %}

@@ -386,6 +386,7 @@ def group_scores(request):
 
     subjects = Subject.objects.all()
     dic = []
+    avg=[]
 
     for subject in subjects:
 
@@ -411,16 +412,26 @@ def group_scores(request):
                     low_student = grade.student
             grades = Grade.objects.filter(student=low_student, subject=subject)
             print(grades)
-        else:
-            return
+        elif order == 'average':
+            total=0
+            numGrades=0
+            for grade in subject.grades.all():
+                total+=grade.score
+                numGrades+=1
+            avg.append({
+                "subject":subject,
+                "average":total/numGrades
+            })
+            grades=None
+
 
         dic.append({
             "subject":subject,
             "grades":grades
         })
+        print(avg)
 
-
-    return render(request, 'main/scores/group_scores.html', {"dic":dic, "subjects":subjects})
+    return render(request, 'main/scores/group_scores.html', {"dic":dic, "subjects":subjects, "avg":avg})
 
 def ind_scores(request):
 
