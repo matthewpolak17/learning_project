@@ -391,8 +391,28 @@ def group_scores(request):
 
         if order == 'asc':
             grades = Grade.objects.filter(subject=subject).order_by('score')
-        else:
+        elif order == 'desc':
             grades = Grade.objects.filter(subject=subject).order_by('-score')
+        elif order == 'high':
+            high = 0
+            high_student = None
+            for grade in subject.grades.all():
+                if grade.score > high:
+                    high = grade.score
+                    high_student = grade.student
+            grades = Grade.objects.filter(student=high_student, subject=subject)
+            print(grades)
+        elif order == 'low':
+            low = 101
+            low_student = None
+            for grade in subject.grades.all():
+                if grade.score < low:
+                    low = grade.score
+                    low_student = grade.student
+            grades = Grade.objects.filter(student=low_student, subject=subject)
+            print(grades)
+        else:
+            return
 
         dic.append({
             "subject":subject,
