@@ -103,6 +103,6 @@ class AttemptedAnswer(models.Model):
 
 #Grade model
 class Grade(models.Model):
-    subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, null=True, related_name="grades", on_delete=models.CASCADE)
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     score = models.FloatField(null=True, blank=True)
