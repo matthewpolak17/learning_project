@@ -2,6 +2,7 @@
 
 {% block title %}Group Scores{% endblock %}
 {% load crispy_forms_tags %}
+{% load grade_tags %}
 
 {% block content %}
 <div style="width:50%; margin:auto"><br>
@@ -19,10 +20,10 @@
     </select>
     <button type="submit">Sort</button>
 </form>
-{% if avg %}
+{% if order == "average" %}
     {% for item in avg %}
         <p style="font-weight:bold">{{item.subject.title}}</p>
-        <p>Average: {{item.average}}</p>
+        <p>Average: {{item.average}} {% convert_to_letter_grade item.average %}</p>
     {% endfor %}
 {% else %}
     {% for item in dic %}
@@ -31,12 +32,56 @@
             <p>No attempts yet</p>
         {% else %}
             {% for grade in item.grades %}
-                <p>{{grade.student}} | {{grade.score}}</p>
+                <p>{{grade.student}} | {{grade.score}} {% convert_to_letter_grade grade.score %}</p>
             {% endfor %}
         {% endif %}
         <hr>
     {% endfor %}
 {% endif %}
-</div>
+</div><br><br>
 
+{% if order == "asc" or order == "desc" %}
+<canvas id="gradeChart" width="400" height="400" style="margin:auto"></canvas>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var gradePercentages = JSON.parse('{{grade_percentages_json | safe }}')
+
+    var ctx = document.getElementById('gradeChart').getContext('2d');
+    var gradeChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['A', 'B', 'C', 'D', 'F'], // Update as needed
+            datasets: [{
+                label: 'Grade Distribution',
+                data: [
+                    gradePercentages['A'],
+                    gradePercentages['B'],
+                    gradePercentages['C'],
+                    gradePercentages['D'],
+                    gradePercentages['F'],
+                ],
+                backgroundColor: [
+                    'rgb(0, 193, 2)',
+                    'rgb(149, 193, 0)',
+                    'rgb(193, 147, 0)',
+                    'rgb(193, 96, 0)',
+                    'rgb(193, 5, 0)'
+
+                ],
+                borderColor: [
+                    'rgba(0, 0, 0, 0)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: false,
+
+        }
+    });
+</script>
 {% endblock %}
+

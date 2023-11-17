@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from decimal import Decimal
 from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Subject, User, Quiz
+import json
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -383,13 +384,11 @@ def group_results_detail(request, quiz_id, student_id):
 def group_scores(request):
 
     order = request.GET.get('order', 'desc')
-
     subjects = Subject.objects.all()
     dic = []
     avg=[]
 
     for subject in subjects:
-
         if order == 'asc':
             grades = Grade.objects.filter(subject=subject).order_by('score')
         elif order == 'desc':
@@ -429,9 +428,42 @@ def group_scores(request):
             "subject":subject,
             "grades":grades
         })
-        print(avg)
+        
+    grade_percentages = get_percentages()
+    grade_percentages_json = json.dumps(grade_percentages)
 
-    return render(request, 'main/scores/group_scores.html', {"dic":dic, "subjects":subjects, "avg":avg})
+    return render(request, 'main/scores/group_scores.html', {"dic":dic, "subjects":subjects, "avg":avg, "grade_percentages_json":grade_percentages_json, "order":order})
+
+##returns a list of letter grades and what percentage they make up compared to all grades
+def get_percentages():
+    grades = Grade.objects.all()
+    percentA = percentB = percentC = percentD = percentF = total = 0  
+    for grade in grades:
+        total += 1
+        if grade.score >= 90:
+            percentA += 1
+        elif grade.score >= 80:
+            percentB += 1
+        elif grade.score >= 70:
+            percentC += 1
+        elif grade.score >= 60:
+            percentD += 1
+        else:
+            percentF += 1
+    percentA /= total
+    percentB /= total
+    percentC /= total
+    percentD /= total
+    percentF /= total
+
+    grade_percentages = {
+        'A': percentA,
+        'B': percentB,
+        'C': percentC,
+        'D': percentD,
+        'F': percentF
+    }
+    return grade_percentages
 
 def ind_scores(request):
 
