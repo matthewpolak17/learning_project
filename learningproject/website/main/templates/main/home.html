@@ -8,7 +8,11 @@
     <br>
     <h4>Welcome {{user.get_short_name}} | {% if user.is_teacher %} Teacher View {% else %} Student View {% endif %}</h4>
     <hr>
-    <h5>Feed</h5><br>
+    <div style="display:flex">
+        <h5 style="margin-right:20px">Feed</h5>
+        <a href="{% url 'semes' %}">Change Semester</a>
+    </div>
+    <br>
 
     {% for post in posts reversed %}
     <div class="card">

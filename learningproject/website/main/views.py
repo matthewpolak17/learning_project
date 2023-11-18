@@ -1,10 +1,10 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm, SubjectForm
+from .forms import AnswerForm, QuestionForm, QuizSetupForm, RegisterForm, PostFullForm, PostForm, ReplyForm, LoginForm, SemesterForm, SubjectForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from decimal import Decimal
-from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Subject, User, Quiz
+from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Semester, Subject, User, Quiz
 import json
 
 #this list contains all the users who have logged in
@@ -510,6 +510,21 @@ def subjects(request):
         form = SubjectForm()
 
     return render(request, 'main/subject/subjects.html', {"subjects":subjects, "form":form })
+
+def semes(request):
+
+    semesters = Semester.objects.all()
+
+    if request.method == 'POST':
+        form = SemesterForm(request.POST)
+        if form.is_valid():
+            sem = form.save(commit=False)
+            sem.save()
+            return redirect('/semes/', {"form":form})
+    else:
+        form = SemesterForm()
+            
+    return render(request, 'main/semes.html', {"form":form})
 
 
         

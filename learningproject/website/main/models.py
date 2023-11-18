@@ -52,10 +52,16 @@ class File(models.Model):
         elif (type_tuple[0]).__contains__("vnd.openxmlformats-officedocument.wordprocessingml.document"):
             return "document"
         
+#Semester model
+class Semester(models.Model):
+    num = models.IntegerField(null=True)
+    current = models.BooleanField(default=False)
+        
 #subject model
 class Subject(models.Model):
     title = models.CharField(max_length=255)
     teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    semester = models.ForeignKey(Semester, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -101,8 +107,9 @@ class AttemptedAnswer(models.Model):
     answer = models.ForeignKey(Answer, null=True, on_delete=models.CASCADE)
     attempt = models.ForeignKey(Attempt, null=True, related_name="attempted_answers", on_delete=models.CASCADE)
 
-#Grade model
+    #Grade model
 class Grade(models.Model):
     subject = models.ForeignKey(Subject, null=True, related_name="grades", on_delete=models.CASCADE)
+    semester = models.ForeignKey(Semester, null=True, related_name="grades", on_delete=models.CASCADE)
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     score = models.FloatField(null=True, blank=True)
