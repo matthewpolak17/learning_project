@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Post, Question, Quiz, Reply, Subject, User, Answer
+from .models import Post, Question, Quiz, Reply, Semester, Subject, User, Answer
 
 #registers a new user
 class RegisterForm(UserCreationForm):
@@ -70,6 +70,11 @@ class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
         fields = ["title"]
+
+class SemesterForm(forms.ModelForm):
+    class Meta:
+        model = Semester
+        fields = ["num", "current"]
 
         
 

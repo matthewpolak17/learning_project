@@ -1,0 +1,16 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Semester Info{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:70%; margin:auto">
+    <form method="POST" name="semesterform">
+        {% csrf_token %}
+        {{form|crispy}}
+        <button type="sumbit" class="btn btn-outline-primary" name="submitform" >Submit</button>
+    </form><br>
+
+    <p>Current Semester:</p>
+</div>
+{% endblock %}

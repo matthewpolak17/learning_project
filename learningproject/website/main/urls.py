@@ -34,4 +34,7 @@ urlpatterns = [
     ###subjects
     path('subjects/', views.subjects, name="subjects"),
 
+    ###semester info
+    path('semes/', views.semes, name="semes"),
+
 ]
