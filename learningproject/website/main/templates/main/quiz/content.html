@@ -5,24 +5,30 @@
 
 {% block content %}
 
-<div style="width:50%; margin:auto">
+<div style="width:60%; margin:auto">
     <br>
-    <h4>Content</h4>
+    <h3 style="text-align:center">Content Posted</h3>
     <hr><br>
 
-    <ul style="width:80%; margin:auto">
+    <ul style="width:70%; margin:auto">
         {% for subject in subjects %}
-        <h4>{{subject.title}}</h4>
-            {% for item in quizzes_with_attempts %}
-                {% if item.quiz.subject == subject %}
-                    {% if item.attemptsRem > 0 %}
-                        <li style="font-size:15pt"><a href="{% url 'take_quiz_detail' item.quiz.pk %}">{{item.quiz.title}}</a>  <span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li><hr>
-                    {% else %}
-                        <li style="font-size:15pt">{{item.quiz.title}}<span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li><hr>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-            <br>
+            <div class="card">
+                <div style="height:30px; margin-left:10px; margin-top:3px">
+                    <h4 style="color:darkblue; height:15px; padding:5px 0px 20px 0px">{{subject.title}}</h4>
+                </div>
+                <hr>
+                <div style="padding:0px 25px 10px 40px">
+                    {% for item in quizzes_with_attempts %}
+                        {% if item.quiz.subject == subject %}
+                            {% if item.attemptsRem > 0 %}
+                                <li style="font-size:medium; margin-bottom:10px"><a href="{% url 'take_quiz_detail' item.quiz.pk %}">{{item.quiz.title}}</a>  <span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li>
+                            {% else %}
+                                <li style="font-size:medium; margin-bottom:10px">{{item.quiz.title}}<span style="float:right; font-size:12pt; margin-top:5px">Attempts Remaining: {{item.attemptsRem}}</span></li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div><br>
         {% endfor %}
     </ul>
 </div>

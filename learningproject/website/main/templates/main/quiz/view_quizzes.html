@@ -4,14 +4,15 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div style="width:50%; margin:auto">
-    <br>
-    <p>subject: {{subject.title}}</p>
-    <h4>Quizzes Posted</h4>
+<div style="width:50%; margin:auto"><br>
+    <div style="display:flex; justify-content:space-between; align-items:center">
+        <h4 style="color:darkblue">{{subject.title}} Quizzes</h4>
+        <a href="{% url 'subjects' %}" style="font-size:15pt; margin-right:10px; text-decoration:none">Back</a>
+    </div>
     <hr><br>
     <ul style="width:80%; margin:auto">
         {% for quiz in quizzes %}
-        <li style="font-size:15pt">{{quiz.title}} | {{quiz.weight}} pts<a href="{% url 'question_setup' quiz.pk %}" style="float:right; text-decoration:none">Edit</a></li><hr>
+        <li style="font-size:15pt">{{quiz.title}} | {{quiz.weight}} pts<a href="{% url 'question_setup' quiz.pk %}" style="float:right; text-decoration:none; color:darkorange">Edit</a></li><hr>
         {% endfor %}
     </ul>
 </div>

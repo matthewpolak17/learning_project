@@ -1,0 +1,66 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Individual Scores Chart Page{% endblock %}
+{% load crispy_forms_tags %}
+{% load grade_tags %}
+
+{% block content %}
+
+<div style="width:60%; margin:auto; display:flex; flex-direction:column; align-items:center">
+    <br>
+    <h3 style="text-align:center; color:darkblue">{{request.user.get_short_name}}'s Scores for {{sem.name}}</h3><br>
+    <canvas id="gradesChart" width="600" height="600"></canvas>
+    <br>
+    <div style="display:flex; justify-content:space-between; align-items:center">
+        <h5 style="margin-right:15px">Which semester do you want to view?</h5>
+        <form method="get">
+            {% csrf_token %}
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <select name="sem" class="form-select" style="margin-right: 20px">
+                    <option value="" disabled selected>Select</option>
+                    {% for semester in semesters %}
+                    <option value="{{semester.name}}">{{semester.name}}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-outline-primary">View</button>
+            </div>
+        </form>
+    </div>
+    <br>
+    <a href="{% url 'ind_scores' %}" style="font-size:15pt; margin-right:10px; text-decoration:none">Back</a>
+</div>
+<br><br>
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('gradesChart').getContext('2d');
+    var subject_scores = JSON.parse('{{ json_data|safe }}');
+    var data = {
+        labels: Object.keys(subject_scores),
+        datasets: [{
+            label: '{{student.get_short_name}}s scores for {{ sem.name }}',
+            data: Object.values(subject_scores),
+            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

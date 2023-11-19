@@ -3,49 +3,31 @@
 {% load crispy_forms_tags %}
 {% load filters %}
 {% block content %}
-
 <div style="width:70%; margin:auto">
-    <br>
-    <div>
-        <h4 style="margin-right:15px; float:left; margin-top:10px">{{user.get_short_name}}'s Results</h4>
+<br>
+        <div style="display:flex; justify-content:space-between; align-items:center">
+        <h3>{{student.get_short_name}}'s {{cursem.name}} Results</h3>
         <form method="get" action="{% url 'ind_results'%}" class="form-inline">
             <button type="submit" class="btn btn-outline-primary" style="float:right; margin-left:10px">Submit</button>
-            <input type="text" name="search" class="form-control" placeholder="Looking for a quiz?" style="float:right; width:30%">
+            <input type="text" name="search" class="form-control" placeholder="Looking for a subject?" style="float:right; width:auto">
         </form>
-    </div><br><br>
-    <hr>
-    <p>**Selected answers are highlighted in <span style="color:blue">blue</span></p>
+    </div><hr>
     <br>
 
-    {% if none_taken%}
-    <h5 style="text-align:center">No results to view...</h5>
-    {% endif %}
-
-    {% for quiz in quizzes_taken %}
-        <h3 style="text-align:center; color:rgb(0, 58, 105)">{{quiz.title}}</h3>
-        {% for a in user_attempts %}
-        {% if a.quiz == quiz%}
-        <div class="card" style="padding:20px; margin-top:15px">
-        <h5 style="text-align:center">Attempt #{{a.number}}</h5><hr>
-            {% for question in quiz.questions.all %}
-                <p style="font-weight:bold">{{question.text}}</p>
-                {% for answer in question.answers.all %}
-                    {% with attempted=answer|is_attempted:a%}
-                        {% if attempted %}
-                            <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                        {% else %}
-                            <p>{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
-                        {% endif %}
-                    {% endwith %}
-                {% endfor %}
-                <hr>
-            {% endfor %}
-            <h5 style="text-align:center">Score: {{a.score}}%</h5>
-        </div><br><br>
-        {% endif %}
+    {% for subject in subjects %}
+    <div class="card" style="width:60%; margin:auto">
+        <h4 style="text-align:center; color:darkblue; height:18px; margin-top:8px">{{subject.title}}</h4><hr>
+        <div>
+            {% for item in aa %}
+            {% if item.quiz.subject == subject %}
+            <div style="display:flex; justify-content:space-between; align-items:center; height:20px">
+                <p style="font-size:14pt; margin-left:30px; margin-top:15px">{{item.quiz.title}}</p> 
+                <a href="{% url 'ind_results_detail' item.quiz.id %}" style="margin-right:40px; color:darkgoldenrod">View {{item.numOfAttemptsMade}} Attempt(s)</a>
+            </div><hr>
+            {% endif %}
         {% endfor %}
-        
+        </div>
+    </div><br>
     {% endfor %}
 </div>
-
 {% endblock %}

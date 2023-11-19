@@ -74,7 +74,7 @@ class SubjectForm(forms.ModelForm):
 class SemesterForm(forms.ModelForm):
     class Meta:
         model = Semester
-        fields = ["num", "current"]
+        fields = ["name"]
 
         
 
