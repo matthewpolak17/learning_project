@@ -5,30 +5,37 @@
 {% load grade_tags %}
 
 {% block content %}
-
-    <h3>{{student}}'s Scores</h3>
-    <p>**Displays the highest score among all attempts</p><hr><br>
+<br>
+<div style="width: 60%; margin:auto">
+    <h3 style="text-align:center">{{student.get_short_name}}'s {{cursem.name}} Scores</h3>
+    <hr>
+    <p style="color:dodgerblue; text-align:center">**Displays cumulative grade for each subject based on best quiz grade**</p>
+    <a href="{% url 'grade_chart' %}" style="display:block; text-align:center; color:darkgoldenrod">Visualize Grades</a><br>
 
     {% for subject in subjects %}
-    <div style="display:flex">
-        <h4 style="margin-right:20px">{{subject.title}}</h4>
-        {% for grade in grades %}
-            {% if grade.student == student and grade.subject == subject %}
-            <p>{{grade.score}} {% convert_to_letter_grade grade.score %}</p>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <hr>
-        {% for item in dic %}
+    <div class="card" style="width:60%; margin:auto">
+        <div style="display:flex; padding:10px; height:35px">
+            <h4 style="margin-right:20px; color:darkblue">{{subject.title}}</h4>
+            {% for grade in grades %}
+                {% if grade.student == student and grade.subject == subject %}
+                <p style="margin-top:3px; font-weight:bold">{{grade.score}} {% convert_to_letter_grade grade.score %}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <hr>
+        <div style="margin-left:15px">
+            {% for item in dic %}
             {% if item.subject == subject and item.quiz in subject.quizzes.all %}
-                <p>{{item.quiz.title}} | {{item.quiz.weight}}pts</p>
+                <p style="font-size:medium">{{item.quiz.title}} | {{item.quiz.weight}}pts</p>
                 {% if item.count != 0 %}
-                <p>{{item.highest_score}}%</p>
+                <p style="font-weight:bold">{{item.highest_score}}%</p>
                 {% else %}
-                <p>Not attempted yet</p>
+                <p style="font-weight:bold">Not attempted yet</p>
                 {% endif %}
             {% endif %}
         {% endfor %}
-        <br>
+        </div>
+    </div><br>
     {% endfor %}
+</div><br>
 {% endblock %}

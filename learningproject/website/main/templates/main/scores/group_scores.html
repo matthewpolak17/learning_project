@@ -5,46 +5,78 @@
 {% load grade_tags %}
 
 {% block content %}
-<div style="width:50%; margin:auto"><br>
-<h3>Group scores page</h3>
-<p>**Displays the grades for each subject</p>
-<form method="get" action="">
-    <label for="order">Order</label>
-    <select name="order">
-        <option value="" disabled selected>Select</option>
-        <option value="desc">Descending</option>
-        <option value="asc">Ascending</option>
-        <option value="high">Highest</option>
-        <option value="low">Lowest</option>
-        <option value="average">Average</option>
-    </select>
-    <button type="submit">Sort</button>
-</form>
-{% if order == "average" %}
-    {% for item in avg %}
-        <p style="font-weight:bold">{{item.subject.title}}</p>
-        <p>Average: {{item.average}} {% convert_to_letter_grade item.average %}</p>
-    {% endfor %}
-{% else %}
-    {% for item in dic %}
-        <p style="font-weight:bold">{{item.subject.title}}</p>
-        {% if item.grades.count == 0 %}
-            <p>No attempts yet</p>
-        {% else %}
-            {% for grade in item.grades %}
-                <p>{{grade.student}} | {{grade.score}} {% convert_to_letter_grade grade.score %}</p>
-            {% endfor %}
-        {% endif %}
-        <hr>
-    {% endfor %}
-{% endif %}
-</div><br><br>
+<div style="width:80%; margin:auto"><br>
+    <div style="display:flex; justify-content:space-between; align-items:center">
 
-{% if order == "asc" or order == "desc" %}
-<canvas id="gradeChart" width="400" height="400" style="margin:auto"></canvas><br><br>
-{% endif %}
+        <h3>Group Scores</h3>
+        <form method="get" action="" style="width:auto; display:flex; align-items:center">
+                <label for="order" style="margin-right: 15px; white-space:nowrap; font-size:large">Sort Data:</label>
+                <select name="order" class="form-select">
+                    <option value="" disabled selected>Select</option>
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                    <option value="high">Highest</option>
+                    <option value="low">Lowest</option>
+                    <option value="average">Average</option>
+                </select>
+                <button type="submit" class="btn btn-outline-primary" style="margin-left:15px">Enter</button>
+        </form>
+    </div>
+    <hr>
+    <p style="color:dodgerblue; text-align:center">**Regards every student's grade for each subject this semester**</p><br><br>
+
+
+    <div style="display:flex">
+        <div style="width:100%; margin:auto">
+            {% if order == "average" %}
+            <h4 style="text-align:center">Average Scores</h4><br>
+                {% for item in avg %}
+                <div class="card" style="padding:15px; width:40%; margin:auto">
+                    <h5 style="font-weight:bold; text-align:center">{{item.subject.title}}</h5>
+                    <p style="text-align:center">Average: {{item.average}} {% convert_to_letter_grade item.average %}</p>
+                </div><br>
+                {% endfor %}
+            {% elif order == "asc" or order == "desc" %}
+                {% for item in dic %}
+                <div class="card" style="padding:15px; width:60%; margin:auto">
+                    <h5 style="font-weight:bold">{{item.subject.title}}</h5><hr>
+                    {% if item.grades.count == 0 %}
+                        <p>No attempts yet</p>
+                    {% else %}
+                        {% for grade in item.grades %}
+                            <p>{{grade.student}} | {{grade.score}} {% convert_to_letter_grade grade.score %}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div><br>
+                {% endfor %}
+            {% else %}
+                {% if order == "high" %}<h4 style="text-align:center">Highest Score</h4><br>{% else %}<h4 style="text-align:center">Lowest Score</h4><br>{% endif %}
+                {% for item in dic %}
+                <div class="card" style="padding:15px; width:40%; margin:auto">
+                    <h5 style="font-weight:bold; text-align:center">{{item.subject.title}}</h5>
+                    {% if item.grades.count == 0 %}
+                        <p>No attempts yet</p>
+                    {% else %}
+                        {% for grade in item.grades %}
+                            <p style="text-align:center">{{grade.student}} | {{grade.score}} {% convert_to_letter_grade grade.score %}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div><br>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        {% if order == "asc" or order == "desc" %}
+        <div style="display:flex; flex-direction:column; align-items:center">
+            <h6>Grade Distribution</h6><br>
+            <canvas id="gradeChart" width="400" height="400"></canvas>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <script>
     var gradePercentages = JSON.parse('{{grade_percentages_json | safe }}')
@@ -79,7 +111,6 @@
         },
         options: {
             responsive: false,
-
         }
     });
 </script>

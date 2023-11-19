@@ -24,17 +24,20 @@ urlpatterns = [
 
     ###result viewing
     path('ind_results/', views.ind_results, name="ind_results"),
+    path('ind_results_detail/<int:quiz_id>', views.ind_results_detail, name="ind_results_detail"),
     path('group_results/', views.group_results, name="group_results"),
     path('group_results_detail/<int:quiz_id>/<int:student_id>', views.group_results_detail, name="group_results_detail"),
 
     ###score viewing
     path('group_scores/', views.group_scores, name="group_scores"),
     path('ind_scores/', views.ind_scores, name="ind_scores"),
+    path('grade_chart/', views.grade_chart, name="grade_chart"),
 
     ###subjects
     path('subjects/', views.subjects, name="subjects"),
 
     ###semester info
     path('semes/', views.semes, name="semes"),
+    path('current_semes/', views.current_semes, name="current_semes"),
 
 ]

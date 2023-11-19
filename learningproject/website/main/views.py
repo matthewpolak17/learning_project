@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout, authenticate
 from decimal import Decimal
 from .models import AttemptedAnswer, Grade, Post, File, Question, Attempt, Semester, Subject, User, Quiz
 import json
+from django.core.serializers import serialize
 
 #this list contains all the users who have logged in
 #during a session to display the number of visits the home page
@@ -18,6 +19,7 @@ users_viewed = []
 @login_required(login_url="/login")
 def home(request):
 
+    cursem = Semester.objects.get(is_current=True)
     files = File.objects.all()
     posts = Post.objects.all()
 
@@ -32,7 +34,7 @@ def home(request):
             if post and post.author == request.user:
                 post.delete()
 
-    return render(request, 'main/home.html', {"posts":posts, "files":files, "page_visits": page_visits})
+    return render(request, 'main/home.html', {"posts":posts, "files":files, "page_visits": page_visits, "cursem":cursem})
 
 
 
@@ -199,7 +201,8 @@ def view_quizzes(request, pk):
 #allows them to take a quiz
 @login_required(login_url="/login")
 def content(request):
-    subjects = Subject.objects.all()
+    cursem = Semester.objects.get(is_current=True)
+    subjects = Subject.objects.filter(semester=cursem)
     quizzes = Quiz.objects.all()
     quizzes_with_attempts = []
 
@@ -212,7 +215,7 @@ def content(request):
         })
     
     
-    return render(request, 'main/quiz/content.html', {"quizzes":quizzes, "quizzes_with_attempts":quizzes_with_attempts, "subjects":subjects})
+    return render(request, 'main/quiz/content.html', {"quizzes":quizzes, "quizzes_with_attempts":quizzes_with_attempts, "subjects":subjects, "cursem":cursem})
 
 
 #This view pulls up a quiz and calculates the student's score
@@ -252,7 +255,7 @@ def take_quiz_detail(request, pk):
         total = correct + incorrect
         if total != 0:
             score_value = (correct / total)*100
-            new_attempt.score = score_value
+            new_attempt.score = round(score_value, 2)
             new_attempt.save()
             updateGrade(new_attempt, student)
             return redirect('/ind_results/')
@@ -279,21 +282,16 @@ def updateGrade(new_attempt, student):
             for attempt in quiz.attempts.all():
                 if attempt.score > highest and attempt.student == student:
                     highest = attempt.score
-            print("highest: " + str(highest))
 
             if quiz.attempts.filter(student=student).count() > 0:
                 ideal += quiz.weight
-            print("ideal: " + str(ideal))
 
             actual = actual + ((Decimal(highest) / 100) * quiz.weight)
-            print("actual: " + str(actual))
             
             if ideal != 0:
-                grade.score = actual / ideal * 100
-                print("overall grade: " + str(grade.score))
+                grade.score = round(actual / ideal * 100, 2)
             else:
                 grade.score = 0
-                print("overall grade: " + str(grade.score))
 
         grade.save()
         
@@ -312,37 +310,42 @@ def updateGrade(new_attempt, student):
 #Displays individual student's results
 @login_required(login_url="/login")
 def ind_results(request):
+    cursem = Semester.objects.get(is_current=True)
+    search = request.GET.get('search')
+    subjects = Subject.objects.filter(semester=cursem)
+    student = request.user
+    attempts = Attempt.objects.filter(student=student)
+    aa = []
 
-    quizzes = Quiz.objects.all()
-    attempts = Attempt.objects.all()
+    if search:
+        subjects = Subject.objects.filter(title__icontains=search, semester=cursem)
+
+    for subject in subjects:
+        quizzes = Quiz.objects.filter(subject=subject)
+        for quiz in quizzes:
+            numOfAttemptsMade = quiz.attempts.filter(student=student).count()
+            aa.append({
+                "subject":subject,
+                "quiz":quiz,
+                "numOfAttemptsMade":numOfAttemptsMade
+            })
+
+    return render(request, 'main/results/ind_results.html', {"cursem":cursem, "aa":aa, "subjects":subjects, "student":student})
+
+def ind_results_detail(request, quiz_id):
+    cursem = Semester.objects.get(is_current=True)
+    quiz = Quiz.objects.get(id=quiz_id)
+    attempts = Attempt.objects.filter(quiz=quiz)
     attempted_answers = AttemptedAnswer.objects.all()
 
-    user_attempts = []
-    quizzes_taken = []
-    none_taken = False
-
-    search = request.GET.get('search')
-
-    for attempt in attempts:
-        #allows the template to only display attempts made by the user that's logged in
-        if attempt.student == request.user:
-            user_attempts.append(attempt)
-        #same thing for quizzes
-        if attempt.quiz not in quizzes_taken and attempt.student == request.user:
-            quizzes_taken.append(attempt.quiz)
-
-    if (search):
-        quizzes_taken = Quiz.objects.filter(title__icontains=search)
-
-    if len(quizzes_taken) == 0:
-        none_taken = True
-
-    return render(request, 'main/results/ind_results.html', {"user_attempts":user_attempts, "quizzes_taken":quizzes_taken, "none_taken":none_taken, "attempted_answers":attempted_answers})
+    return render(request, 'main/results/ind_results_detail.html/', {"cursem":cursem, "quiz":quiz, "attempts":attempts, "attempted_answers":attempted_answers})
 
 
 #Displays all students' results
 @login_required(login_url="/login")
 def group_results(request):
+    cursem = Semester.objects.get(is_current=True)
+    subjects = Subject.objects.filter(semester=cursem)
     quizzes = Quiz.objects.all()
     attempts = Attempt.objects.all()
     students = []
@@ -363,7 +366,7 @@ def group_results(request):
                     })
         students = []
 
-    return render(request, 'main/results/group_results.html', {"quizzes":quizzes, "attempts":attempts, "aa":aa})
+    return render(request, 'main/results/group_results.html', {"quizzes":quizzes, "attempts":attempts, "aa":aa, "cursem":cursem, "subjects":subjects})
 
 @login_required(login_url="/login")
 def group_results_detail(request, quiz_id, student_id):
@@ -375,8 +378,9 @@ def group_results_detail(request, quiz_id, student_id):
     for attempt in attempts:
         if attempt.student.id == student_id and attempt.quiz == quiz:
             user_attempts.append(attempt)
+            student = attempt.student
 
-    return render(request, 'main/results/group_results_detail.html', {"user_attempts":user_attempts, "quiz":quiz, "attempted_answers":attempted_answers})
+    return render(request, 'main/results/group_results_detail.html', {"user_attempts":user_attempts, "quiz":quiz, "attempted_answers":attempted_answers, "student":student})
 
 ###----------------------------------------------------------------------------------###
 ### Scores posted from results
@@ -384,7 +388,8 @@ def group_results_detail(request, quiz_id, student_id):
 def group_scores(request):
 
     order = request.GET.get('order', 'desc')
-    subjects = Subject.objects.all()
+    cursem = Semester.objects.get(is_current=True)
+    subjects = Subject.objects.filter(semester=cursem)
     dic = []
     avg=[]
 
@@ -419,7 +424,7 @@ def group_scores(request):
                 numGrades+=1
             avg.append({
                 "subject":subject,
-                "average":total/numGrades
+                "average":round(total/numGrades, 2)
             })
             grades=None
 
@@ -429,14 +434,16 @@ def group_scores(request):
             "grades":grades
         })
         
-    grade_percentages = get_percentages()
+    grade_percentages = get_percentages(cursem)
     grade_percentages_json = json.dumps(grade_percentages)
 
     return render(request, 'main/scores/group_scores.html', {"dic":dic, "subjects":subjects, "avg":avg, "grade_percentages_json":grade_percentages_json, "order":order})
 
 ##returns a list of letter grades and what percentage they make up compared to all grades
-def get_percentages():
-    grades = Grade.objects.all()
+def get_percentages(cursem):
+
+    grades = Grade.objects.filter(subject__semester=cursem)
+
     percentA = percentB = percentC = percentD = percentF = total = 0  
     for grade in grades:
         total += 1
@@ -450,11 +457,13 @@ def get_percentages():
             percentD += 1
         else:
             percentF += 1
-    percentA /= total
-    percentB /= total
-    percentC /= total
-    percentD /= total
-    percentF /= total
+
+    if total != 0:
+        percentA  = round(percentA / total, 2)
+        percentB  = round(percentB / total, 2)
+        percentC  = round(percentC / total, 2)
+        percentD  = round(percentD / total, 2)
+        percentF  = round(percentF / total, 2)
 
     grade_percentages = {
         'A': percentA,
@@ -467,7 +476,8 @@ def get_percentages():
 
 def ind_scores(request):
 
-    subjects = Subject.objects.all()
+    cursem = Semester.objects.get(is_current=True)
+    subjects = Subject.objects.filter(semester=cursem)
     student = request.user
     grades = Grade.objects.all()
 
@@ -491,25 +501,50 @@ def ind_scores(request):
                 "count":count
             })
 
-    return render(request, 'main/scores/ind_scores.html', {"dic":dic, "subjects":subjects, "student":student, "grades":grades})
+    return render(request, 'main/scores/ind_scores.html', {"dic":dic, "subjects":subjects, "student":student, "grades":grades, "cursem":cursem})
+
+def grade_chart(request):
+    student = request.user
+    semesters = Semester.objects.all()
+    cursem = Semester.objects.get(is_current=True)
+    selsem = request.GET.get('sem')
+    sem = None
+    if selsem:
+        subjects = Subject.objects.filter(semester=Semester.objects.get(name=selsem))
+        sem = Semester.objects.get(name=selsem)
+    else:
+        subjects = Subject.objects.filter(semester=cursem)
+        sem = cursem
+    data = {}
+
+    for subject in subjects:
+        grade = Grade.objects.get(subject=subject, student=request.user)
+        data[subject.title] = grade.score
+
+    json_data = json.dumps(data)
+
+    return render(request, 'main/scores/grade_chart.html', {"semesters":semesters, "sem":sem, "json_data":json_data, "student":student})
+
 ###----------------------------------------------------------------------------------###
 ### Subjects
 
 def subjects(request):
 
     subjects = Subject.objects.all()
+    cursem = Semester.objects.get(is_current=True)
 
     if request.method == 'POST':
         form = SubjectForm(request.POST)
         if form.is_valid():
             subject = form.save(commit=False)
             subject.teacher = request.user
+            subject.semester = cursem
             subject.save()
             return redirect('/subjects/', {"subjects":subjects, "form":form })
     else:
         form = SubjectForm()
 
-    return render(request, 'main/subject/subjects.html', {"subjects":subjects, "form":form })
+    return render(request, 'main/subject/subjects.html', {"subjects":subjects, "form":form, "cursem":cursem })
 
 def semes(request):
 
@@ -520,11 +555,22 @@ def semes(request):
         if form.is_valid():
             sem = form.save(commit=False)
             sem.save()
-            return redirect('/semes/', {"form":form})
+            return redirect('/semes/', {"form":form, "semesters":semesters})
     else:
         form = SemesterForm()
             
-    return render(request, 'main/semes.html', {"form":form})
+    return render(request, 'main/semes.html', {"form":form, "semesters":semesters})
+
+def current_semes(request):
+    semesters = Semester.objects.all()
+
+    if request.method == 'POST':
+        selected_semester_id = request.POST.get('current_semester')
+        Semester.objects.all().update(is_current=False)
+        Semester.objects.filter(id=selected_semester_id).update(is_current=True)
+        return redirect('/semes/')
+    
+    return render(request, 'main/current_semes.html', {"semesters":semesters})
 
 
         

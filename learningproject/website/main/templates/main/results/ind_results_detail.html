@@ -1,24 +1,25 @@
 {% extends 'main/base.html'%}
-{% block title %}Group Results Detail{% endblock %}
+{% block title %}{{user.get_short_name}}'s Results{% endblock %}
 {% load crispy_forms_tags %}
 {% load filters %}
 {% block content %}
 <div style="width:60%; margin:auto">
     <br>
     <div style="display:flex; justify-content:space-between; align-items:center">
-        <h4 style="text-align:center; color:rgb(0, 58, 105)">{{quiz.subject.semester.name}} | {{quiz.subject.title}} | {{quiz.title}} | {{student}}</h4>
-        <a href="{% url 'group_results' %}" style="font-size:15pt; margin-right:10px; text-decoration:none">Back</a>
+        <h4 style="text-align:center; color:rgb(0, 58, 105)">{{cursem.name}} | {{quiz.subject.title}} | {{quiz.title}} </h4>
+        <a href="{% url 'ind_results' %}" style="font-size:15pt; margin-right:10px; text-decoration:none">Back</a>
     </div>
     <hr>
-    <p>**Selected answers are highlighted in <span style="color:blue">blue</span></p>
+    <p>**Selected answers are highlighted in <span style="color:blue">blue</span>**</p>
     <br>
-    {% for a in user_attempts %}
-    <div class="card" style="padding:20px; margin-top:15px">
-        <h5 style="text-align:center; font-weight:bold; color:red">Attempt #{{a.number}}</h5><hr>
+    {% for attempt in attempts %}
+    {% if attempt.quiz == quiz and attempt.student == request.user %}
+    <div style="margin:auto; padding:20px" class="card">
+        <h5 style="text-align:center; font-weight:bold; color:red">Attempt #{{attempt.number}}</h5><hr>
         {% for question in quiz.questions.all %}
         <p style="font-weight:bold">{{question.text}}</p>
             {% for answer in question.answers.all %}
-                {% with attempted=answer|is_attempted:a %}
+                {% with attempted=answer|is_attempted:attempt %}
                     {% if attempted %}
                         <p style="color:blue">{{answer.text}}{% if answer.is_correct %} - Correct Answer{% endif %}</p>
                     {% else %}
@@ -26,10 +27,11 @@
                     {% endif %}
                 {% endwith %}
             {% endfor %}
-            <hr>
+        <hr>
         {% endfor %}
-        <h4 style="text-align:center">Score: {{a.score}}%</h4>
+        <h4 style="text-align:center">Score: {{attempt.score}}%</h4>
     </div><br>
+    {% endif %}
     {% endfor %}
-</div><br><br>
+</div><br>
 {% endblock %}

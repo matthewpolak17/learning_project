@@ -4,8 +4,11 @@
 {% block content %}
 <div style="width:50%; margin:auto">
     <br>
-    <p>subject: {{subject.title}}</p>
-    <h4>What's the title for your quiz?</h4>
+    <h6 style="color:darkblue">{{subject.semester.name}} | {{subject.title}} </h6>
+    <div style="display:flex; justify-content:space-between; align-items:center">
+        <h4>What's the title for your quiz?</h4>
+        <a href="{% url 'subjects' %}" style="font-size:15pt; margin-right:10px; text-decoration:none">Back</a>
+    </div>
     <hr><br>
         <div>
             <form method='POST'>

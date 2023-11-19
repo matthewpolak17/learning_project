@@ -1,20 +1,30 @@
 {% extends 'main/base.html'%}
-{% block title %}{{user.get_short_name}}'s Results{% endblock %}
+{% block title %}Subjects Posted{% endblock %}
 {% load crispy_forms_tags %}
 {% load filters %}
 {% block content %}
-<h3>Create Subject</h3><br>
-<form method="POST" name="subjectform">
-    {% csrf_token %}
-    {{form|crispy}}
-    <button type="sumbit" class="btn btn-outline-primary" name="submitform" >Submit</button>
-</form><br>
+<div style="width:60%; margin:auto">
+    <br>
+    <h3 style="color:darkblue">{{cursem.name}} Subjects</h3><hr>
 
     {% for subject in subjects %}
-        <p>{{subject.title}}</p>
-        <div style="display:flex">
-            <a style="margin-right:15px" href="{% url 'view_quizzes' subject.pk %}">View Quizzes</a><a href="{% url 'quiz_setup' subject.pk %}">Add Quiz</a>
-        </div>
-        <hr>
+        {% if subject.semester == cursem %}
+            <p style="font-size:15pt"><b>{{subject.title}}</b> | Teacher: {{subject.teacher}}</p>
+            <div style="display:flex">
+                <a style="margin-right:15px" href="{% url 'view_quizzes' subject.pk %}">View Quizzes</a><a href="{% url 'quiz_setup' subject.pk %}">Add Quiz</a>
+            </div>
+            <hr>
+        {% endif %}
     {% endfor %}
+    <br><br>
+    <div style="width:50%; padding:15px; margin:auto" class="card">
+        <h5 style="color:rgb(214, 52, 214)">Create a new subject</h5><br>
+        <form method="POST" name="subjectform">
+            {% csrf_token %}
+            {{form|crispy}}
+            <button type="sumbit" class="btn btn-outline-primary" name="submitform" >Submit</button>
+        </form>
+    </div>
+    <br>
+</div>
 {% endblock %}

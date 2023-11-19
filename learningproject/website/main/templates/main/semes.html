@@ -4,13 +4,30 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div style="width:70%; margin:auto">
-    <form method="POST" name="semesterform">
-        {% csrf_token %}
-        {{form|crispy}}
-        <button type="sumbit" class="btn btn-outline-primary" name="submitform" >Submit</button>
-    </form><br>
 
-    <p>Current Semester:</p>
+<div style="width:60%; margin:auto">
+    <br>
+    <div style="display:flex; justify-content:space-between; align-items:center">
+        <h4>Semesters:</h4>
+        <a href="{% url 'current_semes' %}" style="font-size:13pt; text-decoration:none; margin-right:10px">Change Current Semester</a>
+    </div>
+    <hr>
+    {% for semester in semesters %}
+    <p {% if semester.is_current %} style="color:rgb(34, 172, 38); font-size:15pt"  {% else %} style="font-size:15pt" {% endif %}>{{semester.name}} {% if semester.is_current %} | Current Semester {% endif %}</p>
+    {% endfor %}
+    <hr>
+    <a href="{% url 'home' %}" style="font-size:13pt; text-decoration:none; margin-left:10px">Back</a>
+    <br>
+    <div style="width:50%; padding:15px; margin:auto" class="card">
+        <h5 style="color:rgb(214, 52, 214)">Start a new semester</h5><br>
+        <form method="POST" name="semesterform">
+            {% csrf_token %}
+            {{form|crispy}}
+            <button type="sumbit" class="btn btn-outline-primary" name="submitform" >Submit</button>
+        </form>
+    </div>
+    <br>
+    <br>
 </div>
+
 {% endblock %}

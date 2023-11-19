@@ -1,0 +1,21 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Current Semester Info{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div style="width:50%; margin:auto">
+    <br>
+    <h3 style="text-align:center; color:dodgerblue">What semester are you in?</h3><hr>
+    <form method="POST">
+        {% csrf_token %}
+        {% for semester in semesters %}
+            <div>
+                <input type="radio" id="{{semester.id}}" value="{{semester.id}}" name="current_semester" {% if semester.is_current %} checked {% endif %}>
+                {{ semester.name }}
+            </div>
+        {% endfor %}<br>
+        <button type="sumbit" class="btn btn-outline-primary">Submit</button><br><br>
+    </form>
+</div>
+{% endblock %}

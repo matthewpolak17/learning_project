@@ -3,25 +3,31 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<div style="width:80%; margin:auto">
+<div style="width:60%; margin:auto">
     <br>
-    <h3 style="text-align:center">Group Results</h3><hr>
-    <br>
-        {% for quiz in quizzes %}
-        <div style="width:60%; margin:auto">
-            <h3 style="color:rgb(0, 58, 105)">{{quiz.title}}</h3>
-            <div class="card" style="padding:15px">
-                {% for item in aa %}
-                    {% if item.quiz == quiz %}
-                    <div style="width:100%; margin:auto">
-                        <b>{{item.student}}</b>
-                        <a href="{% url 'group_results_detail' quiz.id item.student.id %}" style="float:right">View {{item.numOfAttemptsMade}} attempt(s)</a><br>
+    <h3 style="text-align:center; color:darkblue">{{cursem.name}} Group Results</h3><hr>
+    {% for subject in subjects %}
+        <div><br>
+            <h3 style="text-align:center">{{subject.title}}</h3>
+            {% for quiz in quizzes %}
+                {% if quiz.subject.semester == cursem and quiz.subject == subject%}
+    
+                <div style="width:70%; margin:auto">
+                    <h4 style="color:rgb(34, 136, 9); margin-left:15px">{{quiz.title}}</h4>
+                    <div class="card" style="padding:15px">
+                        {% for item in aa %}
+                            {% if item.quiz == quiz %}
+                            <div style="width:100%; margin:auto; padding-bottom:8px">
+                                <b>{{item.student}}</b>
+                                <a href="{% url 'group_results_detail' quiz.id item.student.id %}" style="float:right">View {{item.numOfAttemptsMade}} attempt(s)</a><br>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <br><br>
-        {% endfor %}
-</div>
+                </div><br><br>
+                {% endif %}
+            {% endfor %}
+        </div><br>
+    {% endfor %}
+</div><br><br>
 {% endblock %}

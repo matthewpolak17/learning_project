@@ -54,12 +54,12 @@ class File(models.Model):
         
 #Semester model
 class Semester(models.Model):
-    num = models.IntegerField(null=True)
-    current = models.BooleanField(default=False)
+    name = models.CharField(max_length=255, default="")
+    is_current = models.BooleanField(default=True)
         
 #subject model
 class Subject(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(blank=True, max_length=255)
     teacher = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     semester = models.ForeignKey(Semester, null=True, on_delete=models.CASCADE)
 
@@ -110,6 +110,5 @@ class AttemptedAnswer(models.Model):
     #Grade model
 class Grade(models.Model):
     subject = models.ForeignKey(Subject, null=True, related_name="grades", on_delete=models.CASCADE)
-    semester = models.ForeignKey(Semester, null=True, related_name="grades", on_delete=models.CASCADE)
     student = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     score = models.FloatField(null=True, blank=True)
