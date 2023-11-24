@@ -479,9 +479,25 @@ def ind_scores(request):
     cursem = Semester.objects.get(is_current=True)
     subjects = Subject.objects.filter(semester=cursem)
     student = request.user
-    grades = Grade.objects.all()
-
+    percentiles = []
     dic = []
+
+    #calculates a student's percentile for a particular subject based on their grade
+    for subject in subjects:
+        num = Grade.objects.filter(subject=subject).count() #number of grades in a particular subject
+        rank = 0
+        grades = Grade.objects.filter(subject=subject).order_by('score')
+        for grade in grades:
+            rank += 1
+            if grade.student == request.user:
+                percentile = rank / num * 100
+                percentiles.append({
+                    "student":request.user,
+                    "percentile":percentile,
+                    "subject":subject,
+                })
+
+    grades = Grade.objects.all()
 
     for subject in subjects:
         for quiz in subject.quizzes.all():
@@ -501,7 +517,7 @@ def ind_scores(request):
                 "count":count
             })
 
-    return render(request, 'main/scores/ind_scores.html', {"dic":dic, "subjects":subjects, "student":student, "grades":grades, "cursem":cursem})
+    return render(request, 'main/scores/ind_scores.html', {"dic":dic, "subjects":subjects, "student":student, "grades":grades, "cursem":cursem, "percentiles":percentiles})
 
 def grade_chart(request):
     student = request.user
