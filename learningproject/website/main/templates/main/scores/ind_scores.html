@@ -19,6 +19,11 @@
             {% for grade in grades %}
                 {% if grade.student == student and grade.subject == subject %}
                 <p style="margin-top:3px; font-weight:bold">{{grade.score}} {% convert_to_letter_grade grade.score %}</p>
+                    {% for item in percentiles %}
+                        {% if item.student == request.user and item.subject == subject %}
+                            <p style="margin: 3px 0px 0px 5px"> | {{item.percentile}}th percentile</p>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             {% endfor %}
         </div>
